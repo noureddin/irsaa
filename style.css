@@ -143,7 +143,6 @@ body.k #sh { opacity: 0.5 }
   display: inline-block;
   position: relative;
   --f: 0.85em;
-  vertical-align: -0.45em;
   white-space: preserve nowrap;
 }
 body.d .sh { --f: 0.9em }
