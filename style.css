@@ -1,0 +1,411 @@
+/** FONTS {{{1 **/
+
+/* Amiri; subsetted; see fonts/asubset.sh for downloading the original and subsetting */
+@font-face {
+  font-family: Amiri; font-style: normal; font-weight: 400; font-display: swap;
+  src: local('Amiri'),  /* if found locally, use it, otherwise use another local font, until this loads. */
+       url('fonts/Amiri-.woff2') format('woff2'),
+       url('fonts/Amiri-.woff')  format('woff');
+}
+
+/* Noto Kufi Arabic; subsetted; see fonts/bsubset.sh for downloading the original and subsetting */
+@font-face {
+  font-family: "Noto Kufi Arabic"; font-style: normal; font-weight: 700; font-display: swap;
+  src: local('Noto Kufi Arabic'),  /* if found locally, use it, otherwise use another local font, until this loads. */
+       url('fonts/Noto Kufi-.woff2') format('woff2'),
+       url('fonts/Noto Kufi-.woff')  format('woff');
+}
+
+/* KacstOne; GNU GPLv2; from the debian package fonts-kacst-one version 5.0+svn11846-10 modified 2019-09-22;
+   subsetted and modified; see woff/ksubset.sh in https://github.com/noureddin/recite for details */
+@font-face {
+  font-family: MyKacstOne; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('fonts/KacstOne-.woff2') format('woff2'),
+       url('fonts/KacstOne-.woff')  format('woff'),
+       local('KacstOne');
+  /* don't ask for a local KacstOne first, b/c Blink browsers (eg, Chrome) don't respect the page's locale
+     for the numerals, thus our KacstOne is not a pure subset, but has the Eastern Arabic numerals in ASCII. */
+}
+
+/** GENERAL {{{1 **/
+
+/* body.k is when darkmode is enabled */
+/* body.d is when showing double-page (ie, two facing pages at the same time) */
+/* body.h is when showing help */
+
+body {
+  background: #272500;
+  color: #111;  /* that is the same as light TxtFg in javascript */
+  font-size: calc(12px + 1vmin);
+  margin: 0 auto;
+  padding: 0;
+  /* min-height: 95%; */
+}
+body.k {
+  color: #eee;  /* that is the same as dark TxtFg in javascript */
+}
+
+body.nocursor #canvas { cursor: none }  /* hide when using the keyboard */
+
+#n, #h {
+  /* for width & height, see resize_canvas() in javascript */
+  margin: 1vh auto;
+  position: relative;
+}
+
+#canvas { width: 100%; height: 100%; display: block }
+
+/** INSERT {{{1 **/
+
+#t {
+  color: inherit;
+  font-family: Amiri, MyKacstOne, KacstOne, serif;
+  position: absolute;
+  background: none;
+  box-sizing: border-box;
+  --h: #888;  /* placeholder color (the hint); changed via javascript; see #t::placeholder & its comment */
+}
+
+#t:focus {
+  border: none;
+  border-radius: 0.1em;
+  outline: 0.075em solid #ff8c00a0; /* darkorange with transparency */
+  box-shadow: inset 0.1em 0.1em 0.2em #4204;
+}
+body.k #t:focus {
+  outline: 0.050em solid #ffa500a0;  /* orange with transparency */
+  box-shadow: inset 0.1em 0.1em 0.2em #8608;
+}
+
+.go, #h select {
+  border: 0.075em solid #888;
+  border-radius: 0.15em;
+}
+
+#h *:focus { outline: 0.075em solid darkorange }
+body.k #h *:focus { outline: 0.075em solid #05c }  /* orange inverted and darkened slightly, for select/button */
+body.k #h summary:focus { outline: 0.075em solid orange }
+
+#h a:focus {
+  opacity: 1;
+  border-radius: 0.12em;
+  outline: 0.15em dotted darkorange;
+}
+body.k #h a:focus { outline: 0.15em dotted orange }
+
+#t:disabled { display: none } /* when loading a page OR when help is shown while in insert mode (F1) */
+
+#t::placeholder { opacity: 1; color: var(--h) }
+/* browsers make each letter (in placeholder texts) transluecent independly, contrary to the Web standard,
+   making joined letters look ugly; thus we make it opaque and change the color. */
+
+/** BUTTONS {{{1 **/
+
+#x, #sh, .sh>button {
+  font-size: var(--f);
+  margin: 0; padding: 0;
+  width: calc(2*var(--f));
+  height: calc(2*var(--f));
+  border-radius: 100%;
+  color: #000;  /* inverted in dark */
+}
+
+#sh {
+  display: block;
+  position: absolute;
+  transition: 0.5s opacity;
+  /* single-page attributes: */
+  --f: 2.5vw; top: 0.15em; right: 0.15em; opacity: 0.45;
+}
+body.r #sh { left: 0.15em; right: initial }
+
+body.d #sh {
+  --f: 1em; top: 2.5%;
+  opacity: 0.25;  /* it's an empty space, thus can get more translucent */
+  /* the 0.18% offset to the left is needed because the inner margins of the pages
+     aren't perfectly symmetric between the right and left pages */
+  right: calc(50.18% - var(--f));
+}
+#sh:focus, #showhelp:hover { opacity: 1 }
+body.k #sh { opacity: 0.5 }
+
+#x {
+  display: block;
+  position: absolute;
+  --f: min(5vmin, 1em);
+  top: 1em; left: 1em;
+  opacity: 0.35;
+  transition: 0.5s opacity;
+}
+#x:focus, #x:hover { opacity: 1 }
+
+.sh {
+  display: inline-block;
+  position: relative;
+  --f: 0.85em;
+  vertical-align: -0.45em;
+  white-space: preserve nowrap;
+}
+body.d .sh { --f: 0.9em }
+.sh > span {
+  position: absolute;
+  top: 0; right: 0;
+  width: 100%; height: 100%;
+  background: transparent;
+}
+/* this transparent overlay is needed, because a disabled button with border-radius still changes its style on :hover and :active in Firefox. */
+
+/** HELP SHOWN {{{1 **/
+
+body.h #t:disabled,
+body.h #canvas { filter: blur(0.5vmin) grayscale(1) contrast(0.4) }
+body.h #b,
+body.h #h  { display: block }
+body.h #sh { opacity: 0 !important }
+
+#b { display: none; position: absolute; top: 0; right: 0; width: 100%; height: 100%; cursor: pointer }
+
+#h {
+  display: none;
+  position: absolute;
+  box-sizing: border-box;
+  --w: 100%;  /* changed in javascript; see resize_fit_screen() & resize_scroll_y() */
+  top: 1.25%; right: calc((100% - var(--w, 100%) + 5%) / 2);
+  width: calc(var(--w, 100%) - 5%); height: 95%;
+  background: #e0e0e4aa;
+  padding: 0.5em;
+  border-radius: 1em;
+  font-family: MyKacstOne, KacstOne, serif;
+  line-height: 1.6;
+  box-shadow:
+    inset  0.03em  0.03em 0.15em white,
+    inset -0.03em -0.03em 0.15em black;
+}
+body.k #h { background: #4458 }
+/* todo: Dark #h has bad colors */
+
+#h > .scr {
+  width: 100%; height: 100%;
+  box-sizing: border-box;
+  padding: 0.5em;
+}
+/* see .ssh in the SCROLL section */
+
+
+/** HELP HEADER {{{1 **/
+
+#x, kbd { font-family: "Noto Sans", "DejaVu Sans", sans-serif }
+
+kbd {
+  line-height: 1;
+  font-size: 0.8em;
+  /* based on https://meta.superuser.com/q/4788 */
+  background-color: #fff4;
+  border: 0.025em solid #0005;
+  border-radius: 0.5em;
+  margin: 0 0.1em;
+  padding: 0.07em 0.4em;
+}
+body.k kbd { border: 0.025em solid #fffa; background-color: #fff2 }
+
+h1 {
+  text-align: center;
+  font-size: 110%;
+  padding-bottom: 1rem;
+  border-bottom: 0.05em solid currentColor;
+}
+
+h1, #oh {
+  font-family:
+    "Noto Sans" /* for the colon */, "Noto Kufi Arabic",
+    KacstOne /* local first, for real bold */,
+    MyKacstOne, serif;
+  font-weight: bold;
+}
+
+#h > .scr > p { margin-right: 0.5rem }
+
+.i > span { display: none }
+.i {
+  background: url(icon/icon.svg);
+  background-size: contain;
+  display: inline-block;
+  height: 1.8em;
+  width: 1.8em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.6em;
+}
+
+h1 + p { font-size: 85% }
+
+
+/** HELP HELP {{{1 **/
+
+/* kbd's style in defined in HELP HEADER */
+
+summary {
+  cursor: pointer;
+  background: #a0b0a088;
+  padding: 0.15em 0.5em;
+  border-radius: 1em;
+  --in:
+    inset 0  0.04em 0.20em #fff8,
+    inset 0 -0.04em 0.20em #0008;
+  box-shadow: var(--in);
+}
+
+body.k summary       { background: #7878 }
+/*light*/ summary:hover { background: #a0c0a088 }
+body.k summary:hover { background: #5758 }
+
+summary:hover              { box-shadow: var(--in), 0.06em  0.06em 0.30em #0008 }
+details:open>summary       { box-shadow: var(--in), 0.06em  0.06em 0.30em #0006 }
+details:open>summary:hover { box-shadow: var(--in), 0.06em  0.06em 0.30em #000a }
+
+details {
+  margin: 1em 0;
+  background: #fff6;
+  border-radius: 1em;
+  box-shadow: 0.04em  0.04em 0.20em #0006,
+        inset 0      -0.20em 1.00em #0004;
+  overflow: visible !important;  /* for the outer box-shadow of summary:hover */
+}
+
+body.k details { background: #0001 }
+
+details + p, .t { margin-top: 2em }
+
+details p, details ul, details li { margin: 0 1em }
+details summary { margin: 0 }
+details ul { padding: 0 0.5em }
+
+p + p, ul + p { margin-top: 1em }
+summary + p, summary + ul { margin-top: 0.5em }
+p:last-child, ul:last-child { padding-bottom: 1em }
+
+/** HELP OPTIONS {{{1 **/
+
+.t { display: table }
+.t > div { display: table-row }
+.t > div > div { display: table-cell; padding: 0 0.5em 1em 0 }
+.t > div > div:last-child { padding: 0 1.5em 1em 0 }
+
+p + .t { margin-top: -0.5em }
+
+.t div { text-align: left }
+
+select, button { width: 4em; height: 2em; font-family: inherit; font-size: inherit; cursor: pointer; filter: invert(0.05) }
+body.k select, body.k button { filter: invert(0.85) }
+select.go1 { width: 4.5em }
+select.go2 { width: 3em }
+
+#o select { width: var(--w) }
+#o > li {
+  list-style: none;
+  margin: 0.5em -2em 1em 0;
+  --w: 11em;
+  width: calc(var(--w) + 8em);
+  text-align: left;
+}
+
+#oh { margin-bottom: 0 }
+#o  { margin-top: 0 }
+
+@media (max-width: 449px) {
+  select.go1 { width: 3.5em }
+  select.go2 { width: 2.75em }
+  .t { margin-right: -0.75em; width: calc(100% + 1em) }
+  .t > div > div:last-child { padding: 0 1em 1em 0 }
+  button.go { width: 2.5em }
+}
+
+@media (max-width: 359px) {
+  select.go1 { width: 4.5em }
+  select.go2 { width: 3em }
+  .t { margin-right: 0; width: 100% }
+  .t > div > div { vertical-align: top; text-align: right; width: 10% /* split each cell over two lines */ }
+  button.go { height: 100% }
+  #o > li { --w: 9em; margin-right: -3em }
+}
+
+
+/** HELP FOOTER {{{1 **/
+
+#ft {
+  border-top: 0.05em solid currentColor;
+  padding: 1rem 0 0;
+  margin: 2rem 0.25rem 0;
+  font-size: 90%;
+  opacity: 0.6;
+  transition: 0.5s opacity;
+}
+
+body.k #ft { opacity: 0.7 }
+#ft:hover { opacity: 1 !important }
+
+/* 00a 090 c70  blue green orange
+   4af 0d0 e90 */
+
+/* 080 00a c60  green blue orange
+   6d6 0cf e80 */
+
+a {
+  color: #060;
+  text-decoration: none;
+  border-bottom: 0.05em solid currentColor;
+}
+/* a:nth-last-child(2), */
+a:hover, a:focus {
+  color: #00a;
+  border-bottom: 0.1em solid currentColor;
+}
+/* a:last-child, */
+a:active {
+  color: #c60;
+  border-bottom: 0.2em solid currentColor;
+}
+
+body.k a { color: #6d6 }
+/* body.k a:nth-last-child(2), */
+body.k a:hover, body.k a:focus {
+  color: #0cf;
+}
+/* body.k a:last-child, */
+body.k a:active { color: #e80 }
+
+
+/** SCROLL {{{1 **/
+
+html, body { height: 100% }
+.scr {
+  overflow-y: auto;
+  width: 100%; height: 100%;
+}
+
+#hs, #ls {
+  position: absolute; z-index: 1; pointer-events: none; /* pass through */
+  opacity: 0; transition: 1s opacity;
+  width: 100%; height: 50%;
+}
+
+#hs { top:    0.5em; background: radial-gradient(50% 10% at 50%    0, var(--s), #0000) center top }
+#ls { bottom: 0.5em; background: radial-gradient(50% 10% at 50% 100%, var(--s), #0000) center bottom }
+
+body   { scrollbar-color: #0008 #0002; --s: #f804 }
+body.k { scrollbar-color: #fff8 #fff2; --s: #f905 }
+
+/* body   { scrollbar-color: #0008 #0002; --s: #3805 } */
+/* body.k { scrollbar-color: #fff8 #fff2; --s: #6f04 } */
+
+/* body   { scrollbar-color: #0008 #0002; --ssh: #0084 } */
+/* body.k { scrollbar-color: #fff8 #fff2; --ssh: #24f5 } */
+
+/* body { --scroll-rgb: 0, 0, 0; } */
+/* body.k { --scroll-rgb: 255, 255, 255; } */
+/* /1* #h { scrollbar-color: rebeccapurple green } *1/ */
+/* /1* https://css-tricks.com/custom-scrollbars-in-webkit/ *1/ */
+/* ::-webkit-scrollbar { width: 0.5em } */
+/* ::-webkit-scrollbar-track { -webkit-box-shadow: inset 0 0 0.25em rgba(var(--scroll-rgb),0.3) } */
+/* ::-webkit-scrollbar-thumb { -webkit-box-shadow: inset 0 0 0.25em rgba(var(--scroll-rgb),0.5); border-radius: 0.8em } */
+
+/*: vim: set foldmethod=marker foldmarker={{{,}}} :*/

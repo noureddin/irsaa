@@ -1,0 +1,118 @@
+
+insert = load_flag('i', insert)
+// Screen.set_dark(load_flag('d'))  // darkmode images are still experimental and not online yet
+
+Screen.init()
+
+// TODO: maybe load&store other options
+
+onbeforeunload = () => {
+  store_num('p', p)
+  store_num('w', w)
+  store_flag('i', insert)
+  // store_flag('d', Screen.dark)
+  sync_selectors(p, w)
+  store_num('s', sura_select.value)
+  store_num('a', aaya_select.value)
+  store_num('l', line_select.value)
+}
+
+// addEventListener('keydown', async (ev) => {
+//   if (ev.ctrlKey && ev.key === 'F12') {
+//     const url = location.toString()
+//     // navigator.clipboard.writeText(url)  // unreliable; https://stackoverflow.com/q/69438702
+//     //   .then(() => alert('نُسخ رابط الصفحة حتى الكلمة الحالية'))
+//     //   .catch(() => alert('هذا رابط الصفحة حتى الكلمة الحالية:\n\n'+url))
+//     alert('هذا رابط الصفحة حتى الكلمة الحالية:\n\n'+url)
+//   }
+// })
+
+// show loading-data screen
+draw_emptypage(emptypage.dataloading)
+
+////////////////////////////////////////////////////////////////////////////////
+
+data_loaded.then(() => {
+
+  body.addEventListener('mouseup', (ev) => {
+    if (!loading && !helping) { focus_word() }
+  })
+
+  update_screen_size()
+  Movado.init()
+  onhashchange = () => {
+    const [pp, ww] = hash_get_pw() || [p, w]
+    p = pp
+    w = ww
+    Movado.init()  // goes to p&w
+  }
+
+  txt.oninput = txt_oninput
+  txt.onkeydown = txt_onkeydown
+  onkeydown = window_onkeydown
+  onkeyup = window_onkeyup
+
+  canvas.ondblclick = () => {
+    if (insert && !helping && !loading) {
+      to_normal()
+    }
+  }
+
+  // enable mouse wheel to move by words
+  try {
+    // adapted from the (passive) scroll event throttle; but this is ACTIVE (calls ev.preventDefault())
+    // https://developer.mozilla.org/en-US/docs/Web/API/Document/scroll_event
+    let ticking = 0  // using 0 & 1 here instead of false & true reduces the compressed script size
+    canvas.onwheel = (ev) => {
+      if (!insert && !loading && !helping) {  // ignore non-normal mode
+        ev.preventDefault()
+      }
+      // ^ user can't scroll with the wheel, but forward() & backward() scroll to the current word
+      if (!ticking) { // throttle the event
+        setTimeout(() => {
+          // the actual handler
+          if (!insert && !loading && !helping) {  // ignore non-normal mode
+            const bypixels = ev.deltaMode === 0
+            if      (bypixels ? ev.deltaY >=  5 : ev.deltaY > 0) { Movado.forward() }
+            else if (bypixels ? ev.deltaY <= -5 : ev.deltaY < 0) { Movado.backward() }
+          }
+          // end of the actual handler
+          ticking = 0
+        }, WHEEL_SPEED)
+        ticking = 1
+      }
+    }
+  } catch (e) {}  // ignore if a browser doesn't support wheel events
+
+  // enable vertical swiping to move by words
+  try {
+    let x, y
+    ontouchstart = (ev) => {
+      if (insert || loading || helping || ev.touches.length > 1) { x = null; y = null; return }  // ignore non-normal mode & zooming gestures
+      const t = ev.changedTouches[0]
+      x = t.pageX
+      y = t.pageY
+      Movado.keyup()
+    }
+    ontouchmove = (ev) => {
+      if (insert || loading || helping || ev.touches.length > 1) { x = null; y = null; return } // ignore non-normal mode & zooming gestures
+      const t = ev.changedTouches[0]
+      const dy = t.pageY - y  // magnitude and direction
+      if (Math.abs(dy) < SWIPE_THRESH) { return }  // ignore tiny swipes (a kind of throttling); otherwise it'd move too fast
+      // console.log(Math.abs(dy), SWIPE_THRESH)
+      const dx = Math.abs(t.pageX - x)  // magnitude only
+      // Note: no Movado.keyup() here; ie, this movement is slowed down at breaks
+      if      (dy >  dx) { Movado.forward() }
+      else if (dy < -dx) { Movado.backward() }
+      // otherwise it's a horizontal or near-horizontal swipe
+      x = t.pageX
+      y = t.pageY
+    }
+    ontouchcancel = ontouchend = Movado.keyup
+  } catch (e) {}  // ignore if a browser doesn't support touch events
+
+})
+.catch(() => {  // if failed to load the json data
+  update_screen_size()
+  draw_emptypage(emptypage.datafailed)
+})
