@@ -4,7 +4,7 @@ mini_css=deno run --quiet --allow-read --allow-env=HTTP_PROXY,http_proxy npm:cle
 
 reserved_props=$(shell if ! [ -e .reserved-props ] || [ globalsfree.js -nt .reserved-props ]; then \
 		< globalsfree.js sed -n '/mappings =/,/}$$/!d; /:/!d; s/^ *//; s/:.*/,/; p' \
-			| sort -u | sed '$$s/,//' | tr -d $$'\n' > .reserved-props; \
+			| sort -u | sed '$$s/,/,goatcounter,allow_frame/' | tr -d $$'\n' > .reserved-props; \
 	fi; \
 	cat .reserved-props \
 )

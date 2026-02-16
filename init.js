@@ -91,12 +91,12 @@ const Screen = (() => {
 
 // stats
 if (!nostats) {
-  window.goatcounter = { path: location.href, allow_frame: true }
+  window.goatcounter = { allow_frame: true }
   // privacy-friendly statistics, no tracking of personal data, no need for GDPR consent; see goatcounter.com
   const el = document.createElement('script')
   el.dataset.goatcounter = 'https://irsaa.goatcounter.com/count'
   el.async = true
-  el.src = '//gc.zgo.at/count.js'
+  el.src = '/count.min.js'
   body.append(el)
 }
 
