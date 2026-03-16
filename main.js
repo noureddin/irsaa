@@ -84,7 +84,7 @@ data_loaded.then(() => {
     }
   } catch (e) {}  // ignore if a browser doesn't support wheel events
 
-  // enable vertical swiping to move by words
+  // enable swiping to move by words
   try {
     let x, y
     ontouchstart = (ev) => {
@@ -97,14 +97,16 @@ data_loaded.then(() => {
     ontouchmove = (ev) => {
       if (insert || loading || helping || ev.touches.length > 1) { x = null; y = null; return } // ignore non-normal mode & zooming gestures
       const t = ev.changedTouches[0]
-      const dy = t.pageY - y  // magnitude and direction
-      if (Math.abs(dy) < SWIPE_THRESH) { return }  // ignore tiny swipes (a kind of throttling); otherwise it'd move too fast
+      let dy = t.pageY - y  // magnitude and direction
+      let dx = x - t.pageX  // right is negative! because this is Arabic
+      // ignore tiny swipes (a kind of throttling); otherwise it'd move too fast
+      if (Math.abs(dy) < SWIPE_THRESH) { dy = 0 }  
+      if (Math.abs(dx) < SWIPE_THRESH) { dx = 0 }  
+      if (dy == 0 && dx == 0) { return }
       // console.log(Math.abs(dy), SWIPE_THRESH)
-      const dx = Math.abs(t.pageX - x)  // magnitude only
       // Note: no Movado.keyup() here; ie, this movement is slowed down at breaks
-      if      (dy >  dx) { Movado.forward() }
-      else if (dy < -dx) { Movado.backward() }
-      // otherwise it's a horizontal or near-horizontal swipe
+      if      (dy >= 0 && dx >= 0) { Movado.forward() }
+      else if (dy <= 0 && dx <= 0) { Movado.backward() }
       x = t.pageX
       y = t.pageY
     }

@@ -22,8 +22,8 @@ const correct = (() => {
 const PAUSE_HOLD = 7  // how many skips at pause-points if held the move key (0-10)
 const WHEEL_SPEED = 1<<5  // how many milliseconds to wait between successive wheel events
 // up to ~500 logarithmically; thus 2 to 2**9 by whole numbers in the power (defaults to 2**5)
-const SWIPE_THRESH = 1<<5  // how many pixels swiped to trigger moving by word
-// up to ~250 logarithmically; thus 2 to 2**8 by whole numbers in the power (defaults to 2**5)
+const SWIPE_THRESH = 1<<6  // how many pixels swiped to trigger moving by word
+// up to ~250 logarithmically; thus 2 to 2**8 by whole numbers in the power (defaults to 2**6)
 // both are written as 1<<n instead of 2**n; as n is positive integer, there is not difference.
 
 // global state - screen & mode & colors

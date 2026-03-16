@@ -122,6 +122,7 @@ body.r #sh { left: 0.15em; right: initial }
 body.d #sh {
   --f: 1em; top: 2.5%;
   opacity: 0.25;  /* it's an empty space, thus can get more translucent */
+  /* TODO: unify the font-family & border style of this button across Gecko/Blink */
   /* the 0.18% offset to the left is needed because the inner margins of the pages
      aren't perfectly symmetric between the right and left pages */
   right: calc(50.18% - var(--f));
