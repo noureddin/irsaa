@@ -21,10 +21,11 @@ const correct = (() => {
 
 const PAUSE_HOLD = 7  // how many skips at pause-points if held the move key (0-10)
 
-const make_sensitivity = (max, init, el_range) => {
+const make_sensitivity = (max, init, id) => {
+  const el_range = Qid('s-'+id)
+  const el_reset = Qid('ss'+id).querySelector('button')
   const self = { value:0, real_value:0 }
   //
-  const el_reset = el_range.parentElement.parentElement.querySelector('.s-r')
   // logarithmic, written as 1<<n instead of 2**n; as n is positive integer, there is not difference.
   const real_set = (v) => {
     self.value = v
@@ -32,13 +33,10 @@ const make_sensitivity = (max, init, el_range) => {
     el_reset.disabled = (v == init)
   }
   //
-  const set = (v) => { el_range.value = v; if (v != self.value) { real_set(v) } }
-  self.set = set
+  self.set = (v) => { el_range.value = v; if (v != self.value) { real_set(v) } }
   // note: I don't check here if v is integer or is in bounds
-  const reset = () => set(init)
-  self.reset = reset
-  el_reset.onclick = reset
-  reset()
+  el_reset.onclick = self.reset = () => self.set(init)
+  self.reset()
   //
   el_range.max = max
   el_range.oninput = () => { real_set(el_range.value) }
@@ -46,11 +44,11 @@ const make_sensitivity = (max, init, el_range) => {
   return self
 }
 
-const wheel = make_sensitivity(9, 5, sens_wheel)
+const wheel = make_sensitivity(9, 5, 'w')
 // how many milliseconds to wait between successive wheel events
 // up to ~500 logarithmically; thus 2 to 2**9 by whole numbers in the power (defaults to 2**5)
 
-const swipe = make_sensitivity(8, 6, sens_swipe)
+const swipe = make_sensitivity(8, 6, 's')
 // how many pixels swiped to trigger moving by word
 // up to ~250 logarithmically; thus 2 to 2**8 by whole numbers in the power (defaults to 2**6)
 

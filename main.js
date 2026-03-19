@@ -66,11 +66,12 @@ data_loaded.then(() => {
   try {
     // adapted from the (passive) scroll event throttle; but this is ACTIVE (calls ev.preventDefault())
     // https://developer.mozilla.org/en-US/docs/Web/API/Document/scroll_event
-    let ticking = 0  // using 0 & 1 here instead of false & true reduces the compressed script size
+    let ticking = 0  // using 0 & 1 here instead of false & true actually reduces the compressed script size
     canvas.onwheel = (ev) => {
       if (!insert && !loading && !helping) {  // ignore non-normal mode
         ev.preventDefault()
       }
+      else { return }
       // ^ user can't scroll with the wheel, but forward() & backward() scroll to the current word
       if (!ticking) { // throttle the event
         setTimeout(() => {

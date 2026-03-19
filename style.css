@@ -273,8 +273,8 @@ details {
 
 #ws { margin-top: 2em; margin-bottom: 0 }  /* mouse & touch details, after options */
 #ws > div { margin-top: 1em; padding: 0.5em }
-.s-r { font-size: 80%; width: 2em; height: 2em/*; vertical-align: 0.35em*/ }  /* sliders' reset buttons */
-#s-w, #s-s { vertical-align: -0.5em }
+#ws button { font-size: 80%; width: 2em; height: 2em }  /* sliders' reset buttons */
+#ws input { vertical-align: -0.5em }
 
 body.k details { background: #0001 }
 
