@@ -273,4 +273,30 @@ const update_page = (() => {
 })()
 
 
+// keyboard mappings {{{1
+
+const insert_in_field = (el, ch) => {
+  if (!ch) { return }
+  // https://stackoverflow.com/a/11077016 and comments, with modifications
+  const st = el.selectionStart
+  const en = el.selectionEnd
+  //
+  const before = el.value.substring(0, st)
+  const after  = el.value.substring(en, el.value.length)
+  //
+  el.value = before + ch + after
+  // restore cursor position
+  el.selectionStart = el.selectionEnd = st + ch.length
+}
+
+const intended_key = (ev) => {
+  if (ev.key.match(/^[ \nء-غف-ي]$/)) { return ev.key }
+  // if not emulating (the only choice for now), but entered a non-Arabic letter → auto-emulate the mainstream kb
+  const kk
+    = Q['ibm'][ev.code]
+    ? Q['ibm'][ev.code][+ev.shiftKey]
+    : null
+  if (kk && kk.match(/^[ \nء-غف-ي]$|^ل[اأإآ]$/)) { return kk }
+}
+
 // vim: set foldmethod=marker foldmarker={{{,}}} :
