@@ -20,11 +20,40 @@ const correct = (() => {
 // configurables (in the future)
 
 const PAUSE_HOLD = 7  // how many skips at pause-points if held the move key (0-10)
-const WHEEL_SPEED = 1<<5  // how many milliseconds to wait between successive wheel events
+
+const make_sensitivity = (max, init, el_range) => {
+  const self = { value:0, real_value:0 }
+  //
+  const el_reset = el_range.parentElement.parentElement.querySelector('.s-r')
+  // logarithmic, written as 1<<n instead of 2**n; as n is positive integer, there is not difference.
+  const real_set = (v) => {
+    self.value = v
+    self.real_value = 1 << (max - v)
+    el_reset.disabled = (v == init)
+  }
+  //
+  const set = (v) => { el_range.value = v; if (v != self.value) { real_set(v) } }
+  self.set = set
+  // note: I don't check here if v is integer or is in bounds
+  const reset = () => set(init)
+  self.reset = reset
+  el_reset.onclick = reset
+  reset()
+  //
+  el_range.max = max
+  el_range.oninput = () => { real_set(el_range.value) }
+  //
+  return self
+}
+
+const wheel = make_sensitivity(9, 5, sens_wheel)
+// how many milliseconds to wait between successive wheel events
 // up to ~500 logarithmically; thus 2 to 2**9 by whole numbers in the power (defaults to 2**5)
-const SWIPE_THRESH = 1<<6  // how many pixels swiped to trigger moving by word
+
+const swipe = make_sensitivity(8, 6, sens_swipe)
+// how many pixels swiped to trigger moving by word
 // up to ~250 logarithmically; thus 2 to 2**8 by whole numbers in the power (defaults to 2**6)
-// both are written as 1<<n instead of 2**n; as n is positive integer, there is not difference.
+
 
 // global state - screen & mode & colors
 let insert = true

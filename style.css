@@ -271,6 +271,11 @@ details {
   overflow: visible !important;  /* for the outer box-shadow of summary:hover */
 }
 
+#ws { margin-top: 2em; margin-bottom: 0 }  /* mouse & touch details, after options */
+#ws > div { margin-top: 1em; padding: 0.5em }
+.s-r { font-size: 80%; width: 2em; height: 2em/*; vertical-align: 0.35em*/ }  /* sliders' reset buttons */
+#s-w, #s-s { vertical-align: -0.5em }
+
 body.k details { background: #0001 }
 
 details + p, .t { margin-top: 2em }

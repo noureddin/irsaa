@@ -1,12 +1,14 @@
 
 insert = load_flag('i', insert)
+wheel.set(load_num('_w', wheel.value))
+swipe.set(load_num('_s', swipe.value))
 // Screen.set_dark(load_flag('d'))  // darkmode images are still experimental and not online yet
 
 Screen.init()
 
 // TODO: maybe load&store other options
 
-onbeforeunload = () => {
+document.onvisibilitychange = () => {
   store_num('p', p)
   store_num('w', w)
   store_flag('i', insert)
@@ -15,6 +17,8 @@ onbeforeunload = () => {
   store_num('s', sura_select.value)
   store_num('a', aaya_select.value)
   store_num('l', line_select.value)
+  store_num('_w', wheel.value)
+  store_num('_s', swipe.value)
 }
 
 // addEventListener('keydown', async (ev) => {
@@ -78,7 +82,7 @@ data_loaded.then(() => {
           }
           // end of the actual handler
           ticking = 0
-        }, WHEEL_SPEED)
+        }, wheel.real_value)
         ticking = 1
       }
     }
@@ -100,10 +104,10 @@ data_loaded.then(() => {
       let dy = t.pageY - y  // magnitude and direction
       let dx = x - t.pageX  // right is negative! because this is Arabic
       // ignore tiny swipes (a kind of throttling); otherwise it'd move too fast
-      if (Math.abs(dy) < SWIPE_THRESH) { dy = 0 }  
-      if (Math.abs(dx) < SWIPE_THRESH) { dx = 0 }  
+      if (Math.abs(dy) < swipe.real_value) { dy = 0 }
+      if (Math.abs(dx) < swipe.real_value) { dx = 0 }
       if (dy == 0 && dx == 0) { return }
-      // console.log(Math.abs(dy), SWIPE_THRESH)
+      // console.log(Math.abs(dy), swipe.real_value)
       // Note: no Movado.keyup() here; ie, this movement is slowed down at breaks
       if      (dy >= 0 && dx >= 0) { Movado.forward() }
       else if (dy <= 0 && dx <= 0) { Movado.backward() }
