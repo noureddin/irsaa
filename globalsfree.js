@@ -461,7 +461,7 @@ const update_scrollshadows = () => {
 const scroll_debuglines = async (top, bottom) => {
   // debuglines
   helping = true  // to not call scroll_into_view again (inifite recursion)
-  await update_page(p, w, Screen.dark)
+  await update_page(p, w, screen_dark)
   helping = false
   hline(ctx, 0, W, top/pagescroll.scrollHeight*H, 'hotpink')
   hline(ctx, 0, W, bottom/pagescroll.scrollHeight*H, 'limegreen')

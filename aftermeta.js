@@ -212,7 +212,7 @@ const update_page = (() => {
   // (if the user didn't ask for a different page during the fetching of the current page)
 
   const update_one_page = async (con, dark, p, w, preload_nearby_pages) => {
-    const offset = Screen.page_offset_in_canvas(p)
+    const offset = page_offset_in_canvas(p)
     let page = Pages.has(dark, p)
     if (page == null) {
       const loadingpage = emptypage.pageloading(dark)
@@ -237,7 +237,7 @@ const update_page = (() => {
     p = fixpage(p)
     const con = can ? can.getContext('2d') : ctx
     //
-    if (Screen.right_in_double(p) && w === Q.words[p-1].length) { p += 1; w = 0 }
+    if (right_in_double(p) && w === Q.words[p-1].length) { p += 1; w = 0 }
     // it's illegal to have the right page "full" in double;
     // this can happen when being in single and switching to double.
     //
@@ -246,7 +246,7 @@ const update_page = (() => {
     wanted.clear()
     wanted.add(p)
     //
-    if (!Screen.double) {
+    if (!screen_double) {
       body.classList.toggle('r', p % 2)
       w = await update_one_page(con, dark, p, w, preload4(p+1, p-1, p+2, p+3))
     }
@@ -272,8 +272,7 @@ const update_page = (() => {
   }
 })()
 
-
-// keyboard mappings {{{1
+// keyboard mappings related methods {{{1
 
 const insert_in_field = (el, ch) => {
   if (!ch) { return }

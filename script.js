@@ -9,13 +9,9 @@ const assert_pw = () => {
   assert(!isNaN(w) && w >= 0 && w <= Q.words[p-1].length, 'w is bad')
 }
 
-const correct = (() => {
-  let t
-  return {
-    word: () => t[w],
-    update: () => { t = get_correct_text(p) },
-  }
-})()
+let __correct_text
+const update_correct_text = () => { __correct_text = get_correct_text(p) }
+const correct_word = () => __correct_text[w]
 
 // configurables (in the future)
 
@@ -63,20 +59,20 @@ let helpwait = false
 
 const draw_emptypage = (fn) => {
   const con = ctx
-  const page = fn(Screen.dark)
+  const page = fn(screen_dark)
   con.drawImage(page, 0, 0, W, H)
-  if (Screen.double) {
+  if (screen_double) {
     con.drawImage(page, W, 0, W, H)
-    vline(con, W, 0, H, TxtFg[+Screen.dark], 1)
+    vline(con, W, 0, H, TxtFg[+screen_dark], 1)
   }
   if (!noredraw_screen) { redraw_screen = () => draw_emptypage(fn) }
 }
 
 const preload4 = (a,b,c,d) =>
-  () => Pages.get(Screen.dark, fixpage(a),
-  () => Pages.get(Screen.dark, fixpage(b),
-  () => Pages.get(Screen.dark, fixpage(c),
-  () => Pages.get(Screen.dark, fixpage(d) ))))
+  () => Pages.get(screen_dark, fixpage(a),
+  () => Pages.get(screen_dark, fixpage(b),
+  () => Pages.get(screen_dark, fixpage(c),
+  () => Pages.get(screen_dark, fixpage(d) ))))
 
 // inits based on screen {{{1
 
@@ -87,20 +83,20 @@ onresize = () => {
       requestAnimationFrame(update_scrollshadows)
     }
     // a delay is needed sometimes to get the right dimensions
-    Screen.update_fontsize()
+    update_fontsize()
     txt.resize()
   })
 }
 
 const update_screen_size = () => {
-  Screen.resize_canvas(wide_screen)
+  resize_canvas(wide_screen)
   onresize()
 }
 
-wide_screen.onchange = Screen.resize_canvas
+wide_screen.onchange = resize_canvas
 
 txt.resize = () => {
-  let s = Screen.fontsize
+  let s = screen_fontsize
   txt.style.fontSize = s + 'px'
   while (txt.scrollWidth > 1+txt.clientWidth) {  // this +1 is needed for Blink
     txt.style.fontSize = (s /= 1.05) + 'px'
@@ -123,7 +119,7 @@ const to_normal = () => {
 const to_insert = () => {
   insert = true
   txt.hidden = false
-  update_input(p, w, insert, Screen.double)
+  update_input(p, w, insert, screen_double)
 }
 
 const show_help = () => {
@@ -199,7 +195,7 @@ let sync_selectors = () => {  // overridden by the true one once all the json da
 const Movado = (() => {
   let held_keydown = 0
 
-  const reformat_input = (keep) => update_input(p, w, insert, Screen.double, keep)
+  const reformat_input = (keep) => update_input(p, w, insert, screen_double, keep)
 
   // all Movado methods call either update_page_to() or move() to change p&w
 
@@ -208,7 +204,7 @@ const Movado = (() => {
     if (ww != null) {
       while (ww < Q.words[pp-1].length && is_void_word(pp, +ww)) { ++ww }
     }
-    ;[pp, ww] = await update_page(pp, ww, Screen.dark)
+    ;[pp, ww] = await update_page(pp, ww, screen_dark)
      // if the page is not drawn because the user went to a different page:
     if (ww == null) { return false }
     // otherwise the page is drawn:
@@ -221,7 +217,7 @@ const Movado = (() => {
 
   const full_page = async (pp) => {
     if (await update_page_to(pp)) {
-      correct.update()
+      update_correct_text()
       txt.hidden = true
       normal_scroll(p, w)
     }
@@ -229,7 +225,7 @@ const Movado = (() => {
 
   const new_page = async (pp) => {  // an "almost empty" page; ie, with first non-void words
     if (await update_page_to(pp, 0)) {
-      correct.update()
+      update_correct_text()
       reformat_input()
       if (txt.hidden) { normal_scroll(p, w) }
     }
@@ -238,14 +234,14 @@ const Movado = (() => {
   const redraw = async () => {
     if (await update_page_to(p, w)) {
       // p&w can change if the right page is full when switching from single to double
-      correct.update()
+      update_correct_text()
       reformat_input(true)  // keep input
     }
   }
 
   const go_to = async (pp, ww) => {
     if (await update_page_to(pp, ww)) {
-      correct.update()
+      update_correct_text()
       reformat_input()
     }
   }
@@ -253,11 +249,11 @@ const Movado = (() => {
   //
 
   const move = (fn, by_phrase) => {
-    const page = Pages.has(Screen.dark, p)
+    const page = Pages.has(screen_dark, p)
     // assert(page != null, `page ${p} not available, called in forward() or backward()`)
     const skip_predicate = by_phrase ? isnt_phrase_end : is_void_word
-    w = fn(p, w, page, WordsColor[+Screen.dark], MarginColor[+Screen.dark], skip_predicate)  // draws on offcanvas, unless it returns Q.words[p-1].length
-    ctx.drawImage(w === Q.words[p-1].length ? page : offcanvas, Screen.page_offset_in_canvas(p), 0, W, H)
+    w = fn(p, w, page, WordsColor[+screen_dark], MarginColor[+screen_dark], skip_predicate)  // draws on offcanvas, unless it returns Q.words[p-1].length
+    ctx.drawImage(w === Q.words[p-1].length ? page : offcanvas, page_offset_in_canvas(p), 0, W, H)
     hash_set_pw(p,w)
   }
 
@@ -309,7 +305,7 @@ const Movado = (() => {
     }
     else {
       move(show_words, by_phrase)
-      if (w === Q.words[p-1].length && Screen.right_in_double(p)) {
+      if (w === Q.words[p-1].length && right_in_double(p)) {
         // go on to the next page immediately; otherwise wait for the next forward() call.
         await new_page(p+1)
       }
@@ -331,7 +327,7 @@ const Movado = (() => {
     if (should_skip(by_phrase)) { return }
     //
     const empty = is_page_almost_empty(p, w)
-    const noflip = Screen.left_in_double(p)
+    const noflip = left_in_double(p)
     //
     if (empty) {
       await full_page(p-1)
@@ -353,7 +349,7 @@ const Movado = (() => {
       else if (isNaN(w) || w < 0)       { w = 0 }
       show_help()
       window.onkeydown = (ev) => {
-        if (ev.key === '*') { ev.preventDefault(); Screen.toggle_dark() }
+        if (ev.key === '*') { ev.preventDefault(); toggle_dark() }
       }
     },
     init: () => {  // called after all the json data loads
@@ -486,7 +482,7 @@ const txt_onkeydown = (ev) => {  // filter & emulation & hint & cheating
   if (ev.altKey || ev.ctrlKey) { return }
   else if (ev.key === '#') {
     ev.preventDefault()
-    show_hint(Screen.dark, correct.word())
+    show_hint(screen_dark, correct_word())
   }
   else if (ev.key === 'Enter') {
     ev.preventDefault()
@@ -498,12 +494,12 @@ const txt_onkeydown = (ev) => {  // filter & emulation & hint & cheating
     ev.preventDefault()
     const now = performance.now()
     if (now - since_last_bang < 250) { return }
-    if (correct.word().slice(0, txt.value.length) === txt.value) {  // not wrong so far
-      if (correct.word().length === txt.value.length) {
-        txt.style.background = TxtBgDone[+Screen.dark]
+    if (correct_word().slice(0, txt.value.length) === txt.value) {  // not wrong so far
+      if (correct_word().length === txt.value.length) {
+        txt.style.background = TxtBgDone[+screen_dark]
       }
       else {
-        txt.value = correct.word().slice(0, txt.value.length+1)  // add one correct letter
+        txt.value = correct_word().slice(0, txt.value.length+1)  // add one correct letter
         txt.oninput()
       }
     }
@@ -521,28 +517,28 @@ const txt_onkeydown = (ev) => {  // filter & emulation & hint & cheating
   // else console.log(ev)
 }
 
-const txt_oninput = () => on_insert(Screen.dark, correct.word(), Movado.forward)
+const txt_oninput = () => on_insert(screen_dark, correct_word(), Movado.forward)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const next_full  = () => Movado.full_page(Screen.double ? p + 2 + p%2 : p+1)
-const next_empty = () =>  Movado.new_page(Screen.double ? p + 1 + p%2 : p+1)
-const prev_full  = () => Movado.full_page(Screen.double ? p - 2 + p%2 : p-1)
-const prev_empty = () =>  Movado.new_page(Screen.double ? p - 3 + p%2 : p-1)
+const next_full  = () => Movado.full_page(screen_double ? p + 2 + p%2 : p+1)
+const next_empty = () =>  Movado.new_page(screen_double ? p + 1 + p%2 : p+1)
+const prev_full  = () => Movado.full_page(screen_double ? p - 2 + p%2 : p-1)
+const prev_empty = () =>  Movado.new_page(screen_double ? p - 3 + p%2 : p-1)
 
 // End key:   full right page →  full  left page
 // Home key: empty  left page → empty right page
 const page_end = () => {
   // right page can never be full if double
   if (w === Q.words[p-1].length) { return }
-  Screen.right_in_double(p)
+  right_in_double(p)
     ? Movado.new_page(p+1)
     : Movado.full_page(p)
 }
 const page_home = () => {
   !is_page_almost_empty(p,w)
     ? Movado.new_page(p)
-    : Screen.left_in_double(p)
+    : left_in_double(p)
       && Movado.new_page(p-1)
 }
 
@@ -563,7 +559,7 @@ const window_onkeydown = (ev) => {
   // ^ don't handle if alt or ctrl is pressed, unless it's ctrl with Home or End
   else if (ev.key === 'Escape') { ev.preventDefault(); on_escape() }
   else if (ev.key === 'F1')     { ev.preventDefault(); toggle_help() }
-  else if (ev.key === '*')      { ev.preventDefault(); Screen.toggle_dark() }
+  else if (ev.key === '*')      { ev.preventDefault(); toggle_dark() }
   else if (ev.target.id === 'txt' || !txt.hidden && !txt.disabled) {
     if (loading || helping) { return }
     else if (ev.code === 'Equal') { ev.preventDefault(); Movado.backward(ev.shiftKey) }

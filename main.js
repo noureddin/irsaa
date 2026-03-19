@@ -2,9 +2,9 @@
 insert = load_flag('i', insert)
 wheel.set(load_num('_w', wheel.value))
 swipe.set(load_num('_s', swipe.value))
-// Screen.set_dark(load_flag('d'))  // darkmode images are still experimental and not online yet
+// set_dark(load_flag('d'))  // darkmode images are still experimental and not online yet
 
-Screen.init()
+screen_init()
 
 // TODO: maybe load&store other options
 
@@ -12,7 +12,7 @@ document.onvisibilitychange = () => {
   store_num('p', p)
   store_num('w', w)
   store_flag('i', insert)
-  // store_flag('d', Screen.dark)
+  // store_flag('d', screen_dark)
   sync_selectors(p, w)
   store_num('s', sura_select.value)
   store_num('a', aaya_select.value)
