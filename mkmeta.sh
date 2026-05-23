@@ -9,25 +9,20 @@ if ! zstd --version &>/dev/null; then
   exit 1
 fi
 
-force=false
-if [ "$1" == "-f" ] || [ "$1" == "-B" ]; then
-  force=true
-fi
+out="$1"
 
 mymeta="margins marginwords headers basmalaat morepauses"
-needed=$force
-if ! $force; then
-  if ! [ -e mymeta.json.zst ] || [ _data.json -nt mymeta.json.zst ]; then
-    needed=true
-  else
-    for base in $mymeta; do
-      file="$PAGES_DATA/$base.json"
-      if [ "$file" -nt mymeta.json.zst ]; then needed=true; break; fi
-    done
-  fi
-fi
 
-if ! $needed; then exit; fi
+needed() {
+  [ -f "$out" ] || return 0
+  [ "$out" -nt "_data.json" ] || return 0
+  for base in $mymeta; do
+    [ "$out" -nt "$PAGES_DATA/$base.json" ] || return 0
+  done
+  return 1  # up-to-date
+}
+
+needed || exit 0
 
 { printf '{'
   perl -CDAS -Mutf8 -pe 's|//.*||; s|[ \n]+||g' _data.json | sed '$s/,$//'

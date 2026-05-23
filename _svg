@@ -1,0 +1,17 @@
+<div id="kk">
+<svg id="rk" xmlns="http://www.w3.org/2000/svg">
+<!-- Noto Sans Symbols -->
+<g id="up"><rect></rect><text>↑</text></g>
+<g id="dn"><rect></rect><text>↓</text></g>
+<g id="lf"><rect></rect><text>←</text></g>
+<g id="rt"><rect></rect><text>→</text></g>
+</svg>
+<!-- Noto Sans Symbols2 -->
+<svg id="lk" xmlns="http://www.w3.org/2000/svg">
+<g id="rs"><rect></rect><text>🗘</text><text class="k">F8</text></g>
+<g id="ed"><rect></rect><text>✍</text><text class="k">Enter</text></g>
+<g id="mv"><rect></rect><text>⮌</text><text class="k">Esc</text></g>
+<g id="pv"><rect></rect><text>⏭</text><text class="k"><tspan>S+</tspan>PgUp</text></g>
+<g id="nx"><rect></rect><text>⏮</text><text class="k"><tspan>S+</tspan>PgDn</text></g>
+</svg>
+</div>

@@ -1,6 +1,6 @@
 /** FONTS {{{1 **/
 
-/* Amiri; subsetted; see fonts/asubset.sh for downloading the original and subsetting */
+/* Amiri; SIL OFL-1.1; subsetted; see fonts/asubset.sh for downloading the original and subsetting */
 @font-face {
   font-family: Amiri; font-style: normal; font-weight: 400; font-display: swap;
   src: local('Amiri'),  /* if found locally, use it, otherwise use another local font, until this loads. */
@@ -27,6 +27,14 @@
      for the numerals, thus our KacstOne is not a pure subset, but has the Eastern Arabic numerals in ASCII. */
 }
 
+/* Noto Sans Symbols & Noto Sans Symbols2; SIL OFL-1.1; subsetted & merged;
+   see fonts/symbols.sh for downloading the originals and subsetting and merging */
+@font-face {  /* the name is intentionally "wrong", NotoSymbols instead of NotoSansSymbols, because NotoSansSymbols is half the font */
+  font-family: NotoSymbols; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('fonts/NotoSymbols-.woff2') format('woff2'),
+       url('fonts/NotoSymbols-.woff')  format('woff');
+}
+
 /** GENERAL {{{1 **/
 
 /* body.k is when darkmode is enabled */
@@ -34,7 +42,7 @@
 /* body.h is when showing help */
 
 body {
-  background: #272500;
+  background: #FFFDD8;  /* same as margin color */
   color: #111;  /* that is the same as light TxtFg in javascript */
   font-size: calc(12px + 1vmin);
   margin: 0 auto;
@@ -42,8 +50,10 @@ body {
   /* min-height: 95%; */
 }
 body.k {
+  background: #272500;
   color: #eee;  /* that is the same as dark TxtFg in javascript */
 }
+body>.scr { background: inherit }  /* to be grayscaled when showing help */
 
 body.nocursor #canvas { cursor: none }  /* hide when using the keyboard */
 
@@ -63,7 +73,7 @@ body.nocursor #canvas { cursor: none }  /* hide when using the keyboard */
   position: absolute;
   background: none;
   box-sizing: border-box;
-  --h: #888;  /* placeholder color (the hint); changed via javascript; see #t::placeholder & its comment */
+  --i: #888;  /* placeholder color (the hint); changed via javascript; see #t::placeholder & its comment */
 }
 
 #t:focus {
@@ -95,9 +105,149 @@ body.k #h a:focus { outline: 0.15em dotted orange }
 
 #t:disabled { display: none } /* when loading a page OR when help is shown while in insert mode (F1) */
 
-#t::placeholder { opacity: 1; color: var(--h) }
+#t::placeholder { opacity: 1; color: var(--i) }
 /* browsers make each letter (in placeholder texts) transluecent independly, contrary to the Web standard,
    making joined letters look ugly; thus we make it opaque and change the color. */
+
+
+/** ONSCREEN KB {{{1 **/
+
+svg * { transition: 0.25s fill, 0.25s stroke }
+
+#kk {
+  visibility: hidden;
+  font-family: NotoSymbols, sans-serif;
+  /* lightmode colors */
+  /* --bg: transparent; */
+  --c: #a00;  /* keys color */
+  --s: #fff;
+  --hover: #fff8;
+  --active: #ffff;
+}
+body.k #kk { /* darkmode colors */
+  /* --bg: #18003044; */
+  /* --c: #fff8;  /1* keys color *1/ */
+  --c: #fdd;
+  --s: #000;
+  --hover: #fff6;
+  --active: #fffa;
+}
+
+#kk        { opacity: 0.10; transition: opacity 1.5s ease-in-out }
+@media (hover: hover) {
+  #kk:hover { opacity: 0.50; transition: opacity 0.2s ease-out }
+}
+#kk.H,
+#kk:active { opacity: 0.50; transition: opacity 0.2s ease-out }
+/* show fast but hide slowly, unless triggered; see the comment in main.js for details */
+
+svg, button {
+  touch-action: manipulation; /* disable double-tap zooming; https://stackoverflow.com/a/53236027 */
+}
+
+/* we have two keypads & three layouts
+   #rk has four keys
+   #lk has three keys
+   each key is a square whose side is 12vw in portrait and 6vw in landscape
+   #kk.G "manette" layout is a circle (30x30 viewBox for both)
+   #kk.P "triangle" layout is a triangle (30x20 viewBox for both) (currently disabled; could be removed entirely)
+   #kk.S "square" layout is a square (20x20 viewBox for both)
+   #kk.L "laptop" layout is a column (10x40 #rk & 10x30 #lk)
+   keypad's height is needed for calculating its position.
+*/
+
+#kk {
+  --U: 1vw; /* changed to 2vh whenever 1vw is greater */
+}
+
+svg {
+  /* background: var(--bg); */
+  height: calc(var(--F)*var(--H)*var(--U));
+  /* portrait (scroll-y) */
+  --F: 2.5;
+  position: fixed;
+  top: var(--h);
+  top: min(var(--h), calc(100vh - var(--F)*var(--H)*var(--U)));
+  /* immediately under the canvas if there's a space, otherwise at the bottom screen */
+}
+
+body.d svg { /* landscape (screen-fit) */
+  --F: 1;
+  position: absolute;
+}
+body.d #kk.T svg { top: 5vh }
+body.d #kk.M svg { top: calc(45vh - var(--H)*var(--U)/2) }
+body.d #kk.B svg { top: calc(95vh - var(--H)*var(--U)) }
+/* note: no var(--F) because it equals 1 here (body.d) */
+
+#kk { cursor: pointer }
+
+#kk.G svg { --H: 18 } /* manette layout */
+#kk.S svg { --H: 12 } /* square layout */
+#kk.L svg { --H: 24 } /* laptop layout */
+
+/* #kk.G svg { --H: 18; border-radius: 100% }  /1* manette layout *1/ */
+/* /1* #kk.P svg { --H: 12; border-radius: 1em }   /2* triangle layout *2/ *1/ */
+/* #kk.S svg { --H: 12; border-radius: 0.5em } /1* square layout *1/ */
+/* #kk.L svg { --H: 24; border-radius: 0.5em } /1* laptop layout *1/ */
+
+#rk {
+  /* right: max(0px, calc(50vw - 50vmin - 25vmin)); */
+  right: 0;
+}
+
+#lk {
+  /* left: max(0px, calc(50vw - 50vmin - 25vmin)); */
+  left: 0;
+}
+
+#kk.R #rk { right: initial; left: 0 }
+#kk.R #lk { left: initial; right: 0 }
+
+#kk tspan { display: none }
+#kk.F tspan { display: initial }
+
+/* @media (orientation: portrait) { */
+/* svg { top: min(100vw, calc(100vh - 25vmin)) } */
+/* #rk { right: 5.25vmin } */
+/* #lk { left:  5.25vmin } */
+/* } */
+
+#kk g * { user-select: none; }  /* it's easy to select it while clicking */
+
+@media (hover: hover) {
+  #kk g:hover * { cursor: pointer }
+  #kk g:hover { filter: drop-shadow(0 0 0.02em red); }
+  #kk g:hover>rect { fill: var(--hover) }
+}
+#kk g:active>rect { fill: var(--active) }
+
+#kk g>rect {
+  width: 8px;
+  height: 8px;
+  rx: 1px;
+  stroke: var(--c);
+  stroke-width: 0.5px;
+  fill: none;
+}
+
+/* #rk text { font-weight: bold } */
+#kk g>text {
+  /* font-family: Noto Sans Symbols2, Noto Sans Symbols, Noto Sans, sans-serif; */
+  font-size: 5px;
+  dominant-baseline: middle;
+  text-anchor: middle;
+  fill: var(--c);
+  /* stroke: var(--s); */
+  /* stroke-width: 0.5px; */
+  /* stroke-miterlimit: 1; */
+  /* paint-order: stroke; */
+}
+#kk g>text.k {
+  font-family: monospace;
+  font-size: 2px;
+  dominant-baseline: alphabetic;
+}
 
 /** BUTTONS {{{1 **/
 
@@ -112,12 +262,11 @@ body.k #h a:focus { outline: 0.15em dotted orange }
 
 #sh {
   display: block;
-  position: absolute;
+  position: fixed;
   transition: 0.5s opacity;
   /* single-page attributes: */
-  --f: 2.5vw; top: 0.15em; right: 0.15em; opacity: 0.45;
+  --f: 3.8vw; top: 0.15em; left: 0.15em; opacity: 0.45;
 }
-body.r #sh { left: 0.15em; right: initial }
 
 body.d #sh {
   --f: 1em; top: 2.5%;
@@ -127,8 +276,6 @@ body.d #sh {
      aren't perfectly symmetric between the right and left pages */
   right: calc(50.18% - var(--f));
 }
-#sh:focus, #showhelp:hover { opacity: 1 }
-body.k #sh { opacity: 0.5 }
 
 #x {
   display: block;
@@ -138,7 +285,13 @@ body.k #sh { opacity: 0.5 }
   opacity: 0.35;
   transition: 0.5s opacity;
 }
-#x:focus, #x:hover { opacity: 1 }
+
+body.k #sh { opacity: 0.5 }
+#sh:focus, #x:focus { opacity: 1 }
+
+@media (hover: hover) {
+  #sh:hover, #x:hover { opacity: 1 }
+}
 
 .sh {
   display: inline-block;
@@ -157,11 +310,19 @@ body.d .sh { --f: 0.9em }
 
 /** HELP SHOWN {{{1 **/
 
+button:disabled { cursor: not-allowed }
+
 body.h #t:disabled,
-body.h #canvas { filter: blur(0.5vmin) grayscale(1) contrast(0.4) }
+body.h>.scr { filter: blur(0.5vmin) grayscale(1) brightness(0.6) }
 body.h #b,
 body.h #h  { display: block }
 body.h #sh { opacity: 0 !important }
+
+hr {
+  border: none;
+  border-top: 0.05em solid currentColor;
+  margin: 0.5rem 0.25rem 0;
+}
 
 #b { display: none; position: absolute; top: 0; right: 0; width: 100%; height: 100%; cursor: pointer }
 
@@ -192,6 +353,14 @@ body.k #h { background: #4458 }
 /* see .ssh in the SCROLL section */
 
 
+/** HELP GOTO {{{1 **/
+
+h1 + p {
+  padding-bottom: 0.5rem;
+  border-bottom: 0.05rem solid currentColor;
+  margin-bottom: 2rem;
+}
+
 /** HELP HEADER {{{1 **/
 
 #x, kbd { font-family: "Noto Sans", "DejaVu Sans", sans-serif }
@@ -215,7 +384,7 @@ h1 {
   border-bottom: 0.05em solid currentColor;
 }
 
-h1, #oh {
+h1 {
   font-family:
     "Noto Sans" /* for the colon */, "Noto Kufi Arabic",
     KacstOne /* local first, for real bold */,
@@ -236,10 +405,16 @@ h1, #oh {
   vertical-align: -0.6em;
 }
 
-h1 + p { font-size: 85% }
-
+.nt { font-size: 85%; opacity: 0.5; transition: opacity 1s }
+.nt:hover { opacity: 1 }
 
 /** HELP HELP {{{1 **/
+
+#v h2 {
+  font-size: 130%;
+  font-weight: normal;
+  margin: 0.7em 0.7em 0.2em;
+}
 
 /* kbd's style in defined in HELP HEADER */
 
@@ -271,29 +446,39 @@ details {
   overflow: visible !important;  /* for the outer box-shadow of summary:hover */
 }
 
-#ws { margin-top: 2em; margin-bottom: 0 }  /* mouse & touch details, after options */
-#ws > div { margin-top: 1em; padding: 0.5em }
-#ws button { font-size: 80%; width: 2em; height: 2em }  /* sliders' reset buttons */
-#ws input { vertical-align: -0.5em }
+body.k details {
+  box-shadow: 0.04em  0.04em 0.40em #000f,
+        inset 0      -0.20em 1.00em #fff4;
+}
+
+.wk > div { margin-top: 1em; padding: 0.5em }
+/* .wk button { font-family: NotoSymbols, MyKacstOne, KacstOne, serif; font-size: 80%; width: 9em; height: 2em }  /1* sliders' reset buttons *1/ */
+.wk button { font-size: 80%; width: 4em; height: 2em }  /* sliders' reset buttons */
+.wk input[type="range"], .wk button { vertical-align: -0.5em }
+.wk input[type="range"] { width: 100% }
+.wk select { width: 100% }
+.t .chk { text-align: right; padding: 0 0.25em 0 0 }
 
 body.k details { background: #0001 }
 
-details + p, .t { margin-top: 2em }
+/* details + p, .t { margin-top: 2em } */
 
-details p, details ul, details li { margin: 0 1em }
+details p, details ul, details li { margin: 0 1em 0 0 }
 details summary { margin: 0 }
 details ul { padding: 0 0.5em }
+p + ul, li + li { margin-top: 0.5em }
 
 p + p, ul + p { margin-top: 1em }
-summary + p, summary + ul { margin-top: 0.5em }
 p:last-child, ul:last-child { padding-bottom: 1em }
+summary + p, summary + ul { margin-top: 0.5rem }
+#o { margin-top: 1rem; padding-bottom: 0.5rem }
 
 /** HELP OPTIONS {{{1 **/
 
 .t { display: table }
 .t > div { display: table-row }
-.t > div > div { display: table-cell; padding: 0 0.5em 1em 0 }
-.t > div > div:last-child { padding: 0 1.5em 1em 0 }
+.t > div > * { display: table-cell; padding: 0 0.5em 1em 0 }
+.t .btn { padding: 0 1.5em 1em 0 }  /* the last table-cell of some rows */
 
 p + .t { margin-top: -0.5em }
 
@@ -313,26 +498,41 @@ select.go2 { width: 3em }
   text-align: left;
 }
 
-#oh { margin-bottom: 0 }
-#o  { margin-top: 0 }
+.t * { white-space: nowrap }
+
+.chk span { opacity: 0.35  }
+
+/* support screens down to the width of 420px */
+
+/* the goto table (.t.g) */
+
+@media (max-width: 469px) {
+  .g.t { margin-right: -0.5em }
+  .g.t .btn { padding-right: 1em }
+}
+
 
 @media (max-width: 449px) {
-  select.go1 { width: 3.5em }
-  select.go2 { width: 2.75em }
-  .t { margin-right: -0.75em; width: calc(100% + 1em) }
-  .t > div > div:last-child { padding: 0 1em 1em 0 }
-  button.go { width: 2.5em }
+  select.go2 { width: 2.6em }
+  .g.t .btn { padding-right: 0.5em }
+  button.go { width: 3.6em }
 }
 
-@media (max-width: 359px) {
-  select.go1 { width: 4.5em }
-  select.go2 { width: 3em }
-  .t { margin-right: 0; width: 100% }
-  .t > div > div { vertical-align: top; text-align: right; width: 10% /* split each cell over two lines */ }
-  button.go { height: 100% }
-  #o > li { --w: 9em; margin-right: -3em }
+/* the reset buttons */
+
+@media (max-width: 529px) {
+  .oskpref label + div { max-width: 8em }
 }
 
+@media (max-width: 469px) {
+  .wk .t { margin-right: -0.5em }
+  .wk .t .btn { padding-right: 0.5em }
+}
+
+@media (max-width: 439px) {
+  .wk .t { margin-right: -.9em; width: 100% }
+  .wk .t label + div { padding-right: 0 }
+}
 
 /** HELP FOOTER {{{1 **/
 
@@ -340,13 +540,10 @@ select.go2 { width: 3em }
   border-top: 0.05em solid currentColor;
   padding: 1rem 0 0;
   margin: 2rem 0.25rem 0;
-  font-size: 90%;
-  opacity: 0.6;
-  transition: 0.5s opacity;
 }
 
-body.k #ft { opacity: 0.7 }
-#ft:hover { opacity: 1 !important }
+/* body.k #ft { opacity: 0.7 } */
+/* #ft:hover { opacity: 1 !important } */
 
 /* 00a 090 c70  blue green orange
    4af 0d0 e90 */

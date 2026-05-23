@@ -4,10 +4,10 @@
 
 let [p, w] = hash_get_pw() || [ load_num('p', 1), load_num('w', 0) ]
 
-const assert_pw = () => {
-  assert(!isNaN(p) && p >= 1 && p <= 604, 'p is bad')
-  assert(!isNaN(w) && w >= 0 && w <= Q.words[p-1].length, 'w is bad')
-}
+// const assert_pw = () => {
+//   assert(!isNaN(p) && p >= 1 && p <= 604, 'p is bad')
+//   assert(!isNaN(w) && w >= 0 && w <= Q.words[p-1].length, 'w is bad')
+// }
 
 let __correct_text
 const update_correct_text = () => { __correct_text = get_correct_text(p) }
@@ -44,13 +44,13 @@ const wheel = make_sensitivity(9, 5, 'w')
 // how many milliseconds to wait between successive wheel events
 // up to ~500 logarithmically; thus 2 to 2**9 by whole numbers in the power (defaults to 2**5)
 
-const swipe = make_sensitivity(8, 6, 's')
+const swipe = make_sensitivity(8, 2, 's')
 // how many pixels swiped to trigger moving by word
-// up to ~250 logarithmically; thus 2 to 2**8 by whole numbers in the power (defaults to 2**6)
+// up to ~250 logarithmically; thus 2 to 2**8 by whole numbers in the power (defaults to 2**4)
 
 
 // global state - screen & mode & colors
-let insert = true
+let insert
 let helping = false
 let loading = false  // is the current pages still loading, thus don't accept input?
 let helpwait = false
@@ -78,6 +78,10 @@ const preload4 = (a,b,c,d) =>
 
 onresize = () => {
   requestAnimationFrame(() => {
+    window.innerWidth > 2*window.innerHeight
+      ? kk.style.setProperty('--U', '2vh')
+      : kk.style.setProperty('--U', '1vw')
+    if (window.osk_onresize) { window.osk_onresize() }
     if (helping) {
       // a second delay is apparently needed for this
       requestAnimationFrame(update_scrollshadows)
@@ -111,14 +115,18 @@ txt.resize = () => {
 const focus_word = () => { txt.hidden ? normal_scroll(p,w) : focus_input() }
 
 const to_normal = () => {
-   insert = false
-   txt.hidden = true
-   normal_scroll(p,w)
+  insert = false
+  txt.hidden = true
+  kk_ed.style.display = 'block'
+  kk_mv.style.display = 'none'
+  normal_scroll(p,w)
 }
 
 const to_insert = () => {
   insert = true
   txt.hidden = false
+  kk_ed.style.display = 'none'
+  kk_mv.style.display = 'block'
   update_input(p, w, insert, screen_double)
 }
 
@@ -128,13 +136,15 @@ const show_help = () => {
   body.classList.add('h')
   update_scrollshadows()
   txt.disabled = true
-  document.querySelector('summary').focus()
+  kk.style.visibility = 'hidden'
+  document.querySelector('select').focus()
 }
 
 const hide_help = (focus=true) => {
   helping = false
   body.classList.remove('h')
   if (!loading) {
+    kk.style.visibility = 'visible'
     txt.disabled = false
     if (focus) { focus_word() }
   }
@@ -143,12 +153,14 @@ const hide_help = (focus=true) => {
 const disable_input = () => {  // disable in-page input during page loading
   txt.disabled = true
   loading = true
+  kk.style.visibility = 'hidden'
 }
 
 const enable_input = () => {
   // if, while showing help, the window is resized enough to switch between single/double,
   // it'll call redraw(), which calls update_page(), which calls this.
   if (!helping) {
+    kk.style.visibility = 'visible'
     txt.disabled = false
     focus_word()
   }
@@ -204,7 +216,7 @@ const Movado = (() => {
     if (ww != null) {
       while (ww < Q.words[pp-1].length && is_void_word(pp, +ww)) { ++ww }
     }
-    ;[pp, ww] = await update_page(pp, ww, screen_dark)
+    ;[pp, ww] = await update_page(screen_dark, pp, ww)
      // if the page is not drawn because the user went to a different page:
     if (ww == null) { return false }
     // otherwise the page is drawn:
@@ -347,10 +359,10 @@ const Movado = (() => {
     preinit: () => {  // called after the small mymeta.json loads
       if (isNaN(p) || p < 1 || p > 604) { p = 1; w = 0 }
       else if (isNaN(w) || w < 0)       { w = 0 }
+      p = Math.floor(p)
+      w = Math.floor(w)
       show_help()
-      window.onkeydown = (ev) => {
-        if (ev.key === '*') { ev.preventDefault(); toggle_dark() }
-      }
+      window.onkeydown = (ev) => { if (ev.key === '*') { ev.preventDefault(); toggle_dark() } }
     },
     init: () => {  // called after all the json data loads
       noredraw_screen = true  // don't change the global redraw_screen() again
@@ -542,6 +554,27 @@ const page_home = () => {
       && Movado.new_page(p-1)
 }
 
+const cycle_full_page = () => {
+  if (screen_double) {
+    // move to the next state of [emptyright, fullright-emptyleft, fullleft]
+    if (p % 2) {  // in the right page (it's guaranteed that the right page is not full)
+      Movado.new_page(p+1)
+    }
+    else if (w === Q.words[p-1].length) {  // we are at the end of left page, start again at the right one
+      Movado.new_page(p-1)
+    }
+    else {  // we are somewhere in the left page but not at its end
+      Movado.full_page(p)
+    }
+  }
+  else {  // showing only a single page
+    // if full, make it empty, otherwise make it full
+    w === Q.words[p-1].length
+      ? Movado.new_page(p)
+      : Movado.full_page(p)
+  }
+}
+
 const on_escape = () =>
   helping ? hide_help() :
   insert ? to_normal() :
@@ -559,6 +592,7 @@ const window_onkeydown = (ev) => {
   // ^ don't handle if alt or ctrl is pressed, unless it's ctrl with Home or End
   else if (ev.key === 'Escape') { ev.preventDefault(); on_escape() }
   else if (ev.key === 'F1')     { ev.preventDefault(); toggle_help() }
+  else if (ev.key === 'F8')     { ev.preventDefault(); cycle_full_page() }
   else if (ev.key === '*')      { ev.preventDefault(); toggle_dark() }
   else if (ev.target.id === 'txt' || !txt.hidden && !txt.disabled) {
     if (loading || helping) { return }

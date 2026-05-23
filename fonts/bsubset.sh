@@ -12,7 +12,7 @@ fi
 
 # output="${input%.*}-subset"
 output='Noto Kufi-'
-text="إرساء مصحف تفاعلي لاختبار الحفظ خيارات"
+text="إرساء مصحف تفاعلي لاختبار الحفظ"
 
 pyftsubset "$input" --output-file="$output".woff2 --layout-features=* --flavor=woff2 --text="$text"
 pyftsubset "$input" --output-file="$output".woff  --layout-features=* --flavor=woff  --text="$text" --with-zopfli

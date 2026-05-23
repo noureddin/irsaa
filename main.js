@@ -1,24 +1,33 @@
 
-insert = load_flag('i', insert)
+insert = wantnormal == null ? load_flag('i', !mobile) : !wantnormal
+// url params takes precedence,
+// then localStorage (previous choice by the user),
+// then it defaults to Normal for mobiles and Insert for others.
+
 wheel.set(load_num('_w', wheel.value))
 swipe.set(load_num('_s', swipe.value))
-// set_dark(load_flag('d'))  // darkmode images are still experimental and not online yet
+load_folds()
+set_dark(wantdark == null ? load_flag('d') : wantdark)
+
+// osk prefs are loaded in osk.js
 
 screen_init()
 
-// TODO: maybe load&store other options
+// maybe load&store other options
 
 document.onvisibilitychange = () => {
   store_num('p', p)
   store_num('w', w)
   store_flag('i', insert)
-  // store_flag('d', screen_dark)
+  store_flag('d', screen_dark)
   sync_selectors(p, w)
   store_num('s', sura_select.value)
   store_num('a', aaya_select.value)
   store_num('l', line_select.value)
   store_num('_w', wheel.value)
   store_num('_s', swipe.value)
+  store_folds()
+  store_osk_prefs()
 }
 
 // addEventListener('keydown', async (ev) => {
@@ -55,10 +64,12 @@ data_loaded.then(() => {
   txt.onkeydown = txt_onkeydown
   onkeydown = window_onkeydown
   onkeyup = window_onkeyup
+  insert ? to_insert() : to_normal()
+  init_osk()  // set up onscreen keys
 
   canvas.ondblclick = () => {
-    if (insert && !helping && !loading) {
-      to_normal()
+    if (!helping && !loading) {
+      insert ? to_normal() : to_insert()
     }
   }
 
@@ -116,7 +127,13 @@ data_loaded.then(() => {
       y = t.pageY
     }
     ontouchcancel = ontouchend = Movado.keyup
-  } catch (e) {}  // ignore if a browser doesn't support touch events
+  } catch (e) {
+    // ignore if a browser doesn't support touch events
+    // also remove the swipe option, not to confuse users
+    Qid('sss').style.display = 'none'  // the swipe sensitivity pref row
+    // Todo: should "mouse wheel" pref also be hidden on touch-only devices? can?
+    // Todo: should, on touchscreen devices, be an option to always hide the mouse pointer?
+  }
 
 })
 .catch(() => {  // if failed to load the json data

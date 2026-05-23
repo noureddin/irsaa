@@ -37,7 +37,8 @@ const update_input = (p, w, insert, double, keep=false) => {
   //
   txt.resize()
   if (!keep) { txt.value = "" }
-  txt.oninput()  // update background
+  try { txt.oninput() } catch (e) {}  // update background
+  // ^ silently fails when called in to_insert() in data_loaded.then(), causing everything thing after it (here and in data_loaded.then()) to not execute.
   txt.hidden = false  // see the first line of this function
   if (!txt.disabled) {  // disabled when showing help
     focus_input()
@@ -211,13 +212,13 @@ const update_page = (() => {
   let wanted = new Set()  // if the pages are (still) wanted
   // (if the user didn't ask for a different page during the fetching of the current page)
 
-  const update_one_page = async (con, dark, p, w, preload_nearby_pages) => {
+  const update_one_page = async (Dark, con, p, w, preload_nearby_pages) => {
     const offset = page_offset_in_canvas(p)
-    let page = Pages.has(dark, p)
+    let page = Pages.has(Dark, p)
     if (page == null) {
-      const loadingpage = emptypage.pageloading(dark)
+      const loadingpage = emptypage.pageloading(Dark)
       con.drawImage(loadingpage, offset, 0, W, H)
-      page = await Pages.fetch(dark, p)
+      page = await Pages.fetch(Dark, p)
     }
     // if the current page is no longer needed, don't even preload nearby pages;
     // as we've already gone to a (possibly) far away page.
@@ -225,15 +226,15 @@ const update_page = (() => {
     preload_nearby_pages()
     //
     if (page === "") {  // couldn't load the page
-      con.drawImage(emptypage.pagefailed(dark), offset, 0, W, H)
+      con.drawImage(emptypage.pagefailed(Dark), offset, 0, W, H)
       return Q.words[p-1].length
     }
-    w = draw_page(p, w, page, WordsColor[+dark], MarginColor[+dark])  // draws on offcanvas, unless it returns Q.words[p-1].length
+    w = draw_page(p, w, page, WordsColor[+Dark], MarginColor[+Dark])  // draws on offcanvas, unless it returns Q.words[p-1].length
     con.drawImage(w === Q.words[p-1].length ? page : offcanvas, offset, 0, W, H)
     return w
   }
 
-  return async function update_page (p, w, dark, can) {
+  return async (Dark, p, w, can) => {
     p = fixpage(p)
     const con = can ? can.getContext('2d') : ctx
     //
@@ -248,22 +249,22 @@ const update_page = (() => {
     //
     if (!screen_double) {
       body.classList.toggle('r', p % 2)
-      w = await update_one_page(con, dark, p, w, preload4(p+1, p-1, p+2, p+3))
+      w = await update_one_page(Dark, con, p, w, preload4(p+1, p-1, p+2, p+3))
     }
     else if (p % 2) {
       wanted.add(p+1)
       // the other page's w = -1 because it's the next page, thus "really empty" (0 would make it "almost empty")
       ;[w] = await Promise.all([
-        update_one_page(con, dark, p,    w, preload4(p+1, p-1, p+2, p+3)),
-        update_one_page(con, dark, p+1, -1, preload4(p-2, p+4, p+5, p+6)),
+        update_one_page(Dark, con, p,    w, preload4(p+1, p-1, p+2, p+3)),
+        update_one_page(Dark, con, p+1, -1, preload4(p-2, p+4, p+5, p+6)),
       ])
     }
     else {
       wanted.add(p-1)
       // other page's w = null because it's the prev page, thus full
       ;[w] = await Promise.all([
-        update_one_page(con, dark, p,   w,    preload4(p-1, p-2, p+1, p+2)),
-        update_one_page(con, dark, p-1, null, preload4(p+3, p+4, p+5, p+6)),
+        update_one_page(Dark, con, p,   w,    preload4(p-1, p-2, p+1, p+2)),
+        update_one_page(Dark, con, p-1, null, preload4(p+3, p+4, p+5, p+6)),
       ])
     }
     //

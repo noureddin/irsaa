@@ -38,16 +38,13 @@ const __screen_to_single = () => {
   redraw_screen()
 }
 
-// const toggle_dark = () => {
-//   body.classList.toggle('k', (screen_dark = !screen_dark))
-//   redraw_screen()
-// }
-const toggle_dark = () => { }
+const toggle_dark = () => { body.classList.toggle('k', (screen_dark = !screen_dark)); redraw_screen() }
 
-const trilogical_from_string = (v) => v === '' ? null : v === 'y'
+// darkmode images are still experimental and not online yet
 
-// const set_dark = (d) => { screen_dark = d !== true /* default to lightmode */; toggle_dark() }
-const set_dark = (d) => {}
+const trilogical_from_string = (v) => v === "" ? null : v === 'y'
+
+const set_dark = (d) => { screen_dark = d !== true /* default to lightmode */; toggle_dark() }
 const page_offset_in_canvas = (p) => screen_double && p % 2 ? W : 0
 const right_in_double = (p) => screen_double && p % 2
 const left_in_double = (p) => screen_double && p % 2 == 0
@@ -66,6 +63,18 @@ const screen_init = () => {
 
 ////////////////////////////////////////////////////////////////////////////////
 // DOM constant (never-changing) initializations (event handlers etc) {{{1
+
+for (let el of document.querySelectorAll('input[type="range"]')) {
+  const div = document.createElement('div')
+  div.className = 'btn'
+  const reset = document.createElement('button')
+  // reset.setAttribute('aria-label', 'استرجاع')
+  // reset.setAttribute('title', 'استرجاع')
+  // reset.innerHTML = '🗘&nbsp;استرجاع<span>&nbsp;للأصل<span>'
+  reset.innerHTML = 'استرجاع'
+  div.append(reset)
+  el.parentElement.after(div)
+}
 
 // stats
 if (!nostats) {

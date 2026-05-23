@@ -31,7 +31,7 @@ const range = (i) => [...Array(i).keys()]
 const fixpage = (p) => (p - 1 + 604) % 604 + 1  // wrap around 604 in either direction, but keep it 1-based
 
 // for selectors
-const num_opts = (len) => Array(len).fill(null).map((_,a) => `<option value="${a+1}">${a+1}</option>`).join('')
+const num_opts = (len) => Array(len).fill(null).map((_,a) => `<option value="${a+1}">${a+1}</option>`).join("")
 
 ////////////////////////////////////////////////////////////////////////////////
 // constants {{{1
@@ -56,8 +56,24 @@ const TxtFg       = ['#111',    '#eee']
 // const local_host = !location.protocol.match(/^https?:$/)  /* if file:// (or anything else for that matter) */
 //   || location.hostname.match(/^0\.|^127\.|^192\.|^localhost$/i)
 
-// const url_params = (location.search + location.hash).split(/[?&#]/)
-const nostats = location.search.split(/[?&]/).includes('nostats')
+const url_params = (location.search + location.hash.replace(/%23/g,'#')).split(/[?&#]/)
+const nostats = url_params.includes('nostats')
+
+// trilogical: true = wanted, false = unwanted (the opposite is wanted), null/undef = no pref
+const get_url_pref = (qw_yes, qw_no) => {
+  const s = new Set([...qw_yes.split(' '), ...qw_no.split(' ')])
+  const pp = url_params.filter(e => s.has(e))
+  if (pp.length === 0) { return }  // no pref
+  return qw_yes.includes(pp[pp.length-1])  // true if the last element is in qw_yes, false otherwise
+}
+
+const wantdark = get_url_pref('d dark', 'l light')  // this line is removed if darkmode is disabled -- don't change this comment
+const wantnormal = get_url_pref('n normal', 'i insert')
+// todo: a pref to not show help
+
+// const nostats = location.search.split(/[?&]/).includes('nostats')
+
+const mobile = navigator.userAgent.includes('Mobile')
 
 // const get_param = (key, def) => {
 //   // const rx = new RegExp('^\\Q' + key + '\\E(?:$|=)')  // doesn't work?
@@ -68,7 +84,7 @@ const nostats = location.search.split(/[?&]/).includes('nostats')
 // }
 
 const hash_get_pw = () => {
-  const [p,w] = location.hash.slice(1).split('/')
+  const [p,w] = url_params.reverse().reduce((acc, elem, idx) => acc ? acc : elem.match(/^[0-9]+(?:\/[0-9]+)?$/) ? elem.split('/') : null, null) || []
   if ( !isNaN(p) && p >= 1 && p <= 604
     && (w == null || !isNaN(w) && w >= 0)
   ) {
@@ -91,6 +107,11 @@ const Qid = (id) => document.getElementById(id)
 const txt = Qid('t')
 const container = Qid('n')
 const help = Qid('h')
+
+// osk
+const kk = Qid('kk')
+const [ kk_up, kk_dn, kk_lf, kk_rt, kk_rs, kk_ed, kk_mv, kk_pv, kk_nx ] = document.querySelectorAll('#kk g')
+const [ rkk, lkk ] = document.querySelectorAll('#kk svg')
 
 // shorthands (enable more minification (tested))
 const body = document.body
@@ -183,21 +204,21 @@ const emptypage = (() => {
 
   const cache = {}
 
-  const get = (dark, k, msg) => {
-    // assert(dark != null, 'emptypage called with undefined')
-    k = (dark ? 'd' : 'l') + k
+  const get = (Dark, k, msg) => {
+    // assert(Dark != null, 'emptypage called with undefined')
+    k = (Dark ? 'd' : "") + k  // this line is removed if darkmode is disabled -- don't change this comment
     if (cache[k]) { return cache[k] }
-    const bg = MarginColor[+dark]
-    const fg = TxtFg[+dark]
+    const bg = MarginColor[+Dark]
+    const fg = TxtFg[+Dark]
     cache[k] = make_emptypage(bg, fg, msg)
     return cache[k]
   }
 
   return {
-    pageloading: (dark) => get(dark, 'pl', 'يحمّل الصفحة…'),
-    dataloading: (dark) => get(dark, 'dl', 'يحمّل البيانات…'),
-    pagefailed:  (dark) => get(dark, 'pf', 'تعذّر تحميل الصفحة'),
-    datafailed:  (dark) => get(dark, 'df', 'تعذّر تحميل البيانات'),
+    pageloading: (Dark) => get(Dark, 'pl', 'يحمّل الصفحة…'),
+    dataloading: (Dark) => get(Dark, 'dl', 'يحمّل البيانات…'),
+    pagefailed:  (Dark) => get(Dark, 'pf', 'تعذّر تحميل الصفحة'),
+    datafailed:  (Dark) => get(Dark, 'df', 'تعذّر تحميل البيانات'),
   }
 
 })()
@@ -205,10 +226,39 @@ const emptypage = (() => {
 ////////////////////////////////////////////////////////////////////////////////
 // local storage methods {{{1
 
+const load_char = (k,d) => k in localStorage ?   localStorage.getItem(k) : d
 const load_num  = (k,d) => k in localStorage ?  +localStorage.getItem(k) : d
 const load_flag = (k,d) => k in localStorage ? !!localStorage.getItem(k) : d
+const load_boolean_default_false = (k) => !!localStorage.getItem(k)
+const store_char = (k,d) => localStorage.setItem(k, v)
 const store_num  = (k,v) => localStorage.setItem(k, v)
 const store_flag = (k,v) => localStorage.setItem(k, v ? 'Y' : "")
+const store_if_notdefault = (k,v,d) => v === d ? localStorage.removeItem(k) : localStorage.setItem(k,v)
+const store_boolean_default_false = (k,v) => v ? localStorage.setItem(k,'Y') : localStorage.removeItem(k)
+
+const foldelements = document.querySelectorAll('details')
+const foldnames = '_eg _ep _ov _om _ok'.split(' ')
+// - eg = explanation, general
+// - ep = explanation, pages
+// - ov = options, view
+// - om = options, mouse & touch
+// - ok = options, on-screen keyboard
+// they are named not numbered to maintain their state when they are re-ordered or new ones are added.
+// the last one (the changelog) is not remembered as it's always closed by default.
+
+// console.assert(foldelements.length-1 === foldnames.length, 'bad folds')
+
+const load_folds = () => {
+  for (let i = 0; i < foldnames.length; ++i) {
+    foldelements[i].open = load_boolean_default_false(foldnames[i])
+  }
+}
+
+const store_folds = () => {
+  for (let i = 0; i < foldnames.length; ++i) {
+    store_boolean_default_false(foldnames[i], foldelements[i].open)
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // txt-related methods {{{1
@@ -216,18 +266,18 @@ const store_flag = (k,v) => localStorage.setItem(k, v ? 'Y' : "")
 
 const fade = (() => {
   let int
-  const init = (dark) => dark ? [ 192, 0, -1, 20 ] : [ 128, 0xff, 1, 30 ]  // bgn, end, step, dur
+  const init = (Dark) => Dark ? [ 192, 0, -1, 20 ] : [ 128, 0xff, 1, 30 ]  // bgn, end, step, dur
   const stop = () => { clearInterval(int); int = null }
   const byte2grayhex = (i) => '#' + i.toString(16).padStart(2,'0').repeat(3)  // convert 0-255 to #00000-#ffffff
   //
   return {
     stop: () => { if (int) { stop() } },
-    run: (txt, dark) => {
-      const [bgn, end, step, dur] = init(dark)
+    run: (txt, Dark) => {
+      const [bgn, end, step, dur] = init(Dark)
       let i
-      txt.style.setProperty('--h', byte2grayhex(i=bgn))
+      txt.style.setProperty('--i', byte2grayhex(i=bgn))
       const ifade = () => {
-        txt.style.setProperty('--h', byte2grayhex(i+=step))
+        txt.style.setProperty('--i', byte2grayhex(i+=step))
         if (i === end) {
           stop()
           txt.placeholder = ""
@@ -238,10 +288,10 @@ const fade = (() => {
   }
 })()
 
-const show_hint = (dark, hint) => {
+const show_hint = (Dark, hint) => {
   fade.stop()  // if running
   txt.placeholder = hint
-  fade.run(txt, dark)
+  fade.run(txt, Dark)
 }
 
 const hide_hint = () => {
@@ -249,22 +299,22 @@ const hide_hint = () => {
   txt.placeholder = ""
 }
 
-const on_insert = (dark, correct_word, move_forward) => {
+const on_insert = (Dark, correct_word, move_forward) => {
   const val = txt.value = txt.value
     .replace(/[^ء-غف-ي ]+/g, "")  // remove invalid chars (can happen with pasting)
     .replace(/^ +/, "")   // trim leading spaces
     .replace(/ +$/, " ")  // collapse trailing spaces
   //
   if (val.endsWith(" ") && correct_word === val.replace(/ $/, "")) {  // completed the correct word
-    txt.style.background = TxtBgNormal[+dark]
+    txt.style.background = TxtBgNormal[+Dark]
     txt.value = ""
     move_forward()  // async (in bg)
   }
   else if (correct_word.slice(0, val.length) === val) {  // not wrong so far
-    txt.style.background = TxtBgNormal[+dark]
+    txt.style.background = TxtBgNormal[+Dark]
   }
   else {
-    txt.style.background = TxtBgWrong[+dark]
+    txt.style.background = TxtBgWrong[+Dark]
   }
   txt.resize()
 }
@@ -294,15 +344,15 @@ const PageFormat = (() => {
 
   // if all formats fail, we restart because maybe there is a connection issue
   //   that may be solved later without reloading the page.
-  const reset_format = (dark) => {
-    if (dark)
+  const reset_format = (Dark) => {
+    if (Dark)
       dark_fmt_idx = 0
     else
       light_fmt_idx = 0
   }
 
-  const next_format = (dark) => {
-     if (dark)
+  const next_format = (Dark) => {
+     if (Dark)
         if (dark_fmt_idx >= QuranPagesFormatsDark.length-1) { return false }
         else { ++dark_fmt_idx; return true }
      else
@@ -310,11 +360,11 @@ const PageFormat = (() => {
         else { ++light_fmt_idx; return true }
   }
 
-  const image_src = (dark, p) => {
+  const image_src = (Dark, p) => {
      // if (isNaN(p) || !Number.isInteger(p) || p < 1 || p > 606) {
      //   throw `Invalid page number: expected a number between 1 and 606 inclusive (605 & 606 for the empty pages); got '${p}'`
      // }
-     const f = dark ? QuranPagesFormatsDark[dark_fmt_idx] : QuranPagesFormatsLight[light_fmt_idx]
+     const f = Dark ? QuranPagesFormatsDark[dark_fmt_idx] : QuranPagesFormatsLight[light_fmt_idx]
      const dir = p < 3 && f.first ? f.first : f.dir
      return dir + p + f.ext
   }
@@ -367,14 +417,14 @@ const Pages = (() => {
   }
 
   // Return the image if cached, otherwise return null and request it for a future get_page().
-  const request_page = (dark, p) => {
-    const k = p + (dark ? 'd' : "")
+  const request_page = (Dark, p) => {
+    const k = p + (Dark ? 'd' : "")
     if (imgloaded.has(k)) { touch_page(k); return imgs.get(k) }
-    else { __get_page(dark, p); return null }
+    else { __get_page(Dark, p); return null }
   }
 
-  const __get_page = (dark, p, callback) => {
-    const k = p + (dark ? 'd' : "")
+  const __get_page = (Dark, p, callback) => {
+    const k = p + (Dark ? 'd' : "")
     if (imgs.has(k) && imgs.get(k).src) {
       if (callback) {
         imgloaded.has(k) ? callback(imgs.get(k)) : img_onloads.get(k).push(callback)
@@ -388,7 +438,7 @@ const Pages = (() => {
     touch_page(k)
     //
     im.onerror = () => {
-      if (PageFormat.next(dark)) { im.src = PageFormat.url(dark, p) }
+      if (PageFormat.next(Dark)) { im.src = PageFormat.url(Dark, p) }
       else {  // couldn't load at all
         for (let fn of img_onloads.get(k)) { fn("") }
         img_onloads.delete(k)
@@ -396,7 +446,7 @@ const Pages = (() => {
         im.onload = null
         im.onerror = null
         im.removeAttribute('src')
-        PageFormat.reset(dark)
+        PageFormat.reset(Dark)
         // reset format & didn't set imgloaded because it might load later
       }
     }
@@ -407,13 +457,13 @@ const Pages = (() => {
       im.onload = null
       im.onerror = null
     }
-    im.src = PageFormat.url(dark, p)
+    im.src = PageFormat.url(Dark, p)
     return im
   }
 
-  const get_page = (dark, p) => {
+  const get_page = (Dark, p) => {
     return new Promise((resolve, reject) => {
-      __get_page(dark, p, (page) => resolve(page))
+      __get_page(Dark, p, (page) => resolve(page))
     })
   }
 
@@ -430,17 +480,25 @@ const Pages = (() => {
 
 // the container (the muṣħaf pages)'s width <= the screen's width.
 // the container's height can be < or == or > the screen's height.
-// the help's width == the container's width.
+// the help's width == the container's width - 7%.
 // the help's height == the screen's height.
 
+// note: the constant `kkpos` refers to the input (range), not the div#kkpos containing it.
+//  and we hide it on mobile screen and the like, because it's relevant only to landscape.
+
+// Todo: when fit_screen is forced, help because visibly narrower than the page (even w/o the '*0.93').
+// Todo: check the UX when forcing both doublepage & scroll_y.
+
 const resize_fit_screen = (w) => {
-  help.style.setProperty('--w',
-    container.style.width  = 'min(98vw,' + (w/H*98) + 'vh)')
+  Qid('kkpos').style.display = ""
+  help.style.setProperty('--w', 'calc('+(
+    container.style.width  = 'min(98vw,' + (w/H*98) + 'vh)')+'*0.93)')
   body.style.setProperty('--h',
     container.style.height = 'min(98vh,' + (H/w*98) + 'vw)')
 }
 
 const resize_scroll_y = (w) => {
+  Qid('kkpos').style.display = 'none'
   help.style.setProperty('--w',
     container.style.width = '98vw')
   body.style.setProperty('--h',
@@ -461,7 +519,7 @@ const update_scrollshadows = () => {
 const scroll_debuglines = async (top, bottom) => {
   // debuglines
   helping = true  // to not call scroll_into_view again (inifite recursion)
-  await update_page(p, w, screen_dark)
+  await update_page(screen_dark, p, w)
   helping = false
   hline(ctx, 0, W, top/pagescroll.scrollHeight*H, 'hotpink')
   hline(ctx, 0, W, bottom/pagescroll.scrollHeight*H, 'limegreen')
