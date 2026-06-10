@@ -74,27 +74,38 @@ const screen_init = () => {
 ////////////////////////////////////////////////////////////////////////////////
 // DOM constant (never-changing) initializations (event handlers etc) {{{1
 
+
+;(() => {  // audio options
+  const qq = (el, want, store) => {
+    const v = want != null ? want : load_char(store, "")
+    // note: all qari url params take precedence over the stored previous preference,
+    //   even if the value given in the url param is invalid. (see load.js for 'qari=')
+    el.value = v
+    if (el.value !== v) { el.value = "" }
+  }
+  qq(qp, wantqp, 'qp')
+  qq(qs, wantqs, 'qs')
+  qp.onchange = () => {
+    player.classList.toggle('t', qp.value === 't')
+  }
+  qp.onchange()
+  // no qs.onchange event because its value is checked every times it's needed
+})()
+
 for (let el of document.querySelectorAll('input[type="range"]')) {
-  const div = document.createElement('div')
-  div.className = 'btn'
-  const reset = document.createElement('button')
-  // reset.setAttribute('aria-label', 'استرجاع')
-  // reset.setAttribute('title', 'استرجاع')
-  // reset.innerHTML = '🗘&nbsp;استرجاع<span>&nbsp;للأصل<span>'
-  reset.innerHTML = 'استرجاع'
-  div.append(reset)
-  el.parentElement.after(div)
+  el.parentElement.after(make_element('div', { className:'btn' }, [
+    make_element('button', { innerHTML: 'استرجاع' }),
+  ]))
 }
 
 // stats
 if (!nostats) {
   window.goatcounter = { allow_frame: true }
   // privacy-friendly statistics, no tracking of personal data, no need for GDPR consent; see goatcounter.com
-  const el = document.createElement('script')
-  el.dataset.goatcounter = 'https://irsaa.goatcounter.com/count'
-  el.async = true
-  el.src = '/count.min.js'
-  body.append(el)
+  body.append(make_element('script', {
+    dataset: { goatcounter: 'https://irsaa.goatcounter.com/count' },
+    async: true, src: '/count.min.js',
+  }))
 }
 
 // decode contact

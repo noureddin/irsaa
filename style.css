@@ -109,6 +109,31 @@ body.k #h a:focus { outline: 0.15em dotted orange }
    making joined letters look ugly; thus we make it opaque and change the color. */
 
 
+/** audio player {{{1 **/
+
+#preloader {
+  display: none;
+}
+
+#player {
+  display: block;
+  /* centered with https://stackoverflow.com/a/2006008 */
+  margin-left: -10rem; /* negative half of width */
+  margin-left: max(-10rem, -40vw);
+  width: 20rem;
+  max-width: 80vw;
+  left: 50vw;
+  /* sticky */
+  position: fixed;
+  bottom: 0;
+  /* hidden if no qari is selected */
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 99;
+}
+
+#player.t { bottom: initial; top: 0 }
+
 /** ONSCREEN KB {{{1 **/
 
 svg * { transition: 0.25s fill, 0.25s stroke }
@@ -437,6 +462,9 @@ body.k details {
         inset 0      -0.20em 1.00em #fff4;
 }
 
+#q .t { margin: 0 1.2em 0 0 }
+#q .t select { width: 100% }
+
 .wk > div { margin-top: 1em; padding: 0.5em }
 /* .wk button { font-family: NotoSymbols, MyKacstOne, KacstOne, serif; font-size: 80%; width: 9em; height: 2em }  /1* sliders' reset buttons *1/ */
 .wk button { font-size: 80%; width: 4em; height: 2em }  /* sliders' reset buttons */
@@ -461,6 +489,9 @@ summary + p, summary + ul { margin-top: 0.5rem }
 
 /** HELP OPTIONS {{{1 **/
 
+#qaris { margin: 1em; width: initial; max-width: calc(100% - 2em) }
+#q p { margin-bottom: 1em }
+
 .t { display: table }
 .t > div { display: table-row }
 .t > div > * { display: table-cell; padding: 0 0.5em 1em 0 }
@@ -470,7 +501,9 @@ p + .t { margin-top: -0.5em }
 
 .t div { text-align: left }
 
-select, button { width: 4em; height: 2em; font-family: inherit; font-size: inherit; cursor: pointer; filter: invert(0.05) }
+.g select, .g button { width: 4em; height: 2em }
+select, button { font-family: inherit; font-size: inherit; cursor: pointer; filter: invert(0.05) }
+
 body.k select, body.k button { filter: invert(0.85) }
 select.go1 { width: 4.5em }
 select.go2 { width: 3em }

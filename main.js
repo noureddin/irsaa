@@ -1,5 +1,5 @@
 
-insert = wantnormal == null ? load_flag('i', !mobile) : !wantnormal
+insert = wantnormal != null ? !wantnormal : load_flag('i', !mobile)
 // url params takes precedence,
 // then localStorage (previous choice by the user),
 // then it defaults to Normal for mobiles and Insert for others.
@@ -9,7 +9,13 @@ swipe.set(load_num('_s', swipe.value))
 load_folds()
 set_dark(wantdark == null ? load_flag('d') : wantdark)
 
+// audio qari is loaded in load.js
+// audio prefs are loaded in init.js
 // osk prefs are loaded in osk.js
+
+if (!Qid('qaris')) {
+  audio.setqari(load_char('q'))
+}
 
 screen_init()
 
@@ -24,6 +30,9 @@ document.onvisibilitychange = () => {
   store_num('s', sura_select.value)
   store_num('a', aaya_select.value)
   store_num('l', line_select.value)
+  store_if_notdefault('q', audio.getqari(), "")
+  store_if_notdefault('qp', qp.value, "")
+  store_if_notdefault('qs', qs.value, "")
   store_num('_w', wheel.value)
   store_num('_s', swipe.value)
   store_folds()

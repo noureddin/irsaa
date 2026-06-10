@@ -44,6 +44,19 @@
       <div class="btn"><button class="go">اذهب</button></div>
     </div>
   </div>
+  <details id="q"><summary>تلاوة صوتية:</summary><p>يجري تحميل أسماء التلاوات الصوتية…</p>
+    <div class="t"><!-- table -->
+    <div><label for="qp">موضع المشغِّل:&thinsp;</label><div><select id="qp">
+      <option value="">متوسط في الأسفل</option>
+      <option value="t">متوسط في الأعلى</option>
+    </select></div></div>
+    <div><label for="qs">أسلوب الاستماع:&thinsp;</label><div><select id="qs">
+      <option value="a">بعد إتمام كل آية</option>
+      <option value="b">قبل بدء كل آية</option>
+      <option value="">عند النقر على الآية فقط</option>
+    </select></div></div>
+    </div>
+  </details>
   <hr>
   <details><summary>للتسميع أسلوبان: إظهار الكلمات بالأسهم، وبالكتابة.</summary>
     <p>ويمكن التبديل بينهما وقتما شئت:</p><ul>
@@ -68,6 +81,7 @@
     <p>وفي كليهما:</p><ul>
       <li>الزران اللذان بجوار <kbd>Backspace</kbd> (الشرطة والتساوي) ينتقلان بالكلمة، مهما كان تخطيط لوحة مفاتيحك.
       <li>ضغط زر العالي (<kbd>Shift</kbd>) مع أي زر من أزرار الانتقال بالكلمة ينتقل بالعبارة.
+      <li>ضغط زر التحكم (<kbd>Ctrl</kbd>) مع المسافة (<kbd>&emsp;&emsp;&emsp;&emsp;&emsp;</kbd>) يعيد التلاوة الصوتية الحالية عند وجودها.
       <!-- <li>ضغط <kbd>Ctrl</kbd> مع <kbd>F12</kbd> يظهر رابط الصفحة حتى الكلمة الحالية، لتحفظ موضعك عند التسميع أو القراءة. -->
     </ul>
   </details>
@@ -125,7 +139,7 @@
   </details>
   <details id="v"><summary>هذه إصدارة: <<version>></summary><p>يجري تحميل سجل التغييرات…</p></details>
   <p id="ft" class="nt">
-    <a href="https://github.com/noureddin/irsaa/">المصدر البرمجي</a> │
+    <a href="https://github.com/noureddin/irsaa/">المصدر البرمجي والأصول</a> │
     <a id=xyz>البريد الشابكي</a> │
     جرب كذلك تطبيق <a href="https://www.noureddin.dev/recite/">رَسَيْتُ Recite</a> من المطور نفسه │
     <a href="https://www.noureddin.dev/">تطبيقات أخرى</a> │
@@ -133,6 +147,8 @@
   </p>
 </div>
 </div>
+<audio id="player" controls preload></audio>
+<audio id="preloader" muted preload></audio>
 <<svg>>
 <<script>>
 </body>

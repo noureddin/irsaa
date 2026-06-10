@@ -57,9 +57,9 @@ const TxtFg       = ['#111',    '#eee']
 //   || location.hostname.match(/^0\.|^127\.|^192\.|^localhost$/i)
 
 const url_params = (location.search + location.hash.replace(/%23/g,'#')).split(/[?&#]/)
-const nostats = url_params.includes('nostats')
 
 // trilogical: true = wanted, false = unwanted (the opposite is wanted), null/undef = no pref
+// gets the last one of the all given keys, and returns true if it's in the first group, false if it's in the second, undef otherwise
 const get_url_pref = (qw_yes, qw_no) => {
   const s = new Set([...qw_yes.split(' '), ...qw_no.split(' ')])
   const pp = url_params.filter(e => s.has(e))
@@ -67,6 +67,8 @@ const get_url_pref = (qw_yes, qw_no) => {
   return qw_yes.includes(pp[pp.length-1])  // true if the last element is in qw_yes, false otherwise
 }
 
+const nostats = get_url_pref('nostats', 'stats')
+const nohelp = get_url_pref('nohelp', 'help')
 const wantdark = get_url_pref('d dark', 'l light')  // this line is removed if darkmode is disabled -- don't change this comment
 const wantnormal = get_url_pref('n normal', 'i insert')
 // todo: a pref to not show help
@@ -74,6 +76,15 @@ const wantnormal = get_url_pref('n normal', 'i insert')
 // const nostats = location.search.split(/[?&]/).includes('nostats')
 
 const mobile = navigator.userAgent.includes('Mobile')
+
+const get_param = (key) => {  // key must end with an equal sign
+  const u = url_params.filter(e => e.startsWith(key))
+  return u.length ? u[u.length-1].slice(key.length) : null
+}
+
+const wantqari = get_param('qari=')
+const wantqs = get_param('qs=')
+const wantqp = get_param('qp=')
 
 // const get_param = (key, def) => {
 //   // const rx = new RegExp('^\\Q' + key + '\\E(?:$|=)')  // doesn't work?
@@ -100,6 +111,27 @@ const hash_set_pw = (p,w) => { history.replaceState(null, null, '#'+p+'/'+w) }
 
 const Qid = (id) => document.getElementById(id)
 
+const make_element = (tag, opts, children) => {
+  const el = document.createElement(tag)
+  for (let k in opts) {
+    if (k === 'innerHTML')
+      el.innerHTML = opts[k]
+    else if (typeof opts[k] == 'object')
+      for (let kk in opts[k])
+        el[k][kk] = opts[k][kk]
+    else el[k] = opts[k]
+  }
+  if (children) { el.append(...children) }
+  return el
+}
+
+const make_option = (val, txt) => {
+  const el = document.createElement('option')
+  el.value = val
+  el.innerText = txt
+  return el
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // DOM constants {{{1
 
@@ -107,6 +139,12 @@ const Qid = (id) => document.getElementById(id)
 const txt = Qid('t')
 const container = Qid('n')
 const help = Qid('h')
+
+// audio-related
+const player = Qid('player')
+const preloader = Qid('preloader')
+const qp = Qid('qp')  // position option
+const qs = Qid('qs') // playing style
 
 // osk
 const kk = Qid('kk')
@@ -193,6 +231,9 @@ const vline = (con, x, y0, yf, clr, th) => {
   con.stroke()
 }
 
+const dbg_hline = (y) => hline(ctx, 0, screen_double ? 2*W : W, y, 'hotpink', 2)
+const dbg_vline = (x) => vline(ctx, x, 0, H, 'hotpink', 2)
+
 ////////////////////////////////////////////////////////////////////////////////
 // emptypage singleton {{{1
 // maintains its internal cache, but doesn't rely on or modify anything global.
@@ -249,8 +290,11 @@ const store_flag = (k,v) => localStorage.setItem(k, v ? 'Y' : "")
 const store_if_notdefault = (k,v,d) => v === d ? localStorage.removeItem(k) : localStorage.setItem(k,v)
 const store_boolean_default_false = (k,v) => v ? localStorage.setItem(k,'Y') : localStorage.removeItem(k)
 
+// folds and their local storage methods {{{1
+
 const foldelements = document.querySelectorAll('details')
-const foldnames = '_eg _ep _ov _om _ok'.split(' ')
+const foldnames = '_qa _eg _ep _ov _om _ok'.split(' ')
+// - qa = qaris: audio recitations
 // - eg = explanation, general
 // - ep = explanation, pages
 // - ov = options, view
@@ -259,7 +303,7 @@ const foldnames = '_eg _ep _ov _om _ok'.split(' ')
 // they are named not numbered to maintain their state when they are re-ordered or new ones are added.
 // the last one (the changelog) is not remembered as it's always closed by default.
 
-// console.assert(foldelements.length-1 === foldnames.length, 'bad folds')
+// console.assert(foldelements.length-1 === foldnames.length, 'bad folds', foldelements, foldnames)
 
 const load_folds = () => {
   for (let i = 0; i < foldnames.length; ++i) {

@@ -1,19 +1,6 @@
 // globals {{{1
 
-// global state - current position and text
-
-let [p, w] = hash_get_pw() || [ load_num('p', 1), load_num('w', 0) ]
-
-// const assert_pw = () => {
-//   assert(!isNaN(p) && p >= 1 && p <= 604, 'p is bad')
-//   assert(!isNaN(w) && w >= 0 && w <= Q.words[p-1].length, 'w is bad')
-// }
-
-let __correct_text
-const update_correct_text = () => { __correct_text = get_correct_text(p) }
-const correct_word = () => __correct_text[w]
-
-// configurables (in the future)
+// maybe-will-be configurables
 
 const PAUSE_HOLD = 7  // how many skips at pause-points if held the move key (0-10)
 
@@ -47,13 +34,6 @@ const wheel = make_sensitivity(9, 5, 'w')
 const swipe = make_sensitivity(8, 2, 's')
 // how many pixels swiped to trigger moving by word
 // up to ~250 logarithmically; thus 2 to 2**8 by whole numbers in the power (defaults to 2**4)
-
-
-// global state - screen & mode & colors
-let insert
-let helping = false
-let loading = false  // is the current pages still loading, thus don't accept input?
-let helpwait = false
 
 // methods based on screen {{{1
 
@@ -131,6 +111,7 @@ const show_help = () => {
   txt.disabled = true
   kk.style.visibility = 'hidden'
   document.querySelector('select').focus()
+  if (player.paused) { audio.hide() }
 }
 
 const hide_help = (focus=true) => {
@@ -141,6 +122,8 @@ const hide_help = (focus=true) => {
     txt.disabled = false
     if (focus) { focus_word() }
   }
+  if (audio.can()) { audio.show() }
+  if (audiopending) { audiopending = false; play_or_preload_this() }
 }
 
 const disable_input = () => {  // disable in-page input during page loading
@@ -166,6 +149,64 @@ const enable_input = () => {
 Qid('sh').onclick = show_help
 Qid('x').onclick = hide_help
 Qid('b').onclick = hide_help
+
+const canvas_mouse_to_x_y_p = (ev) => {
+  const sty = getComputedStyle(canvas)
+  const ch = parseFloat(sty.height)
+  const cw = parseFloat(sty.width)
+  const y = ev.offsetY * H/ch
+  let x, pp
+  if (screen_double && ev.offsetX > cw/2) {  // the right (odd) page
+    x = (ev.offsetX - cw/2) * 2*W/cw
+    pp = p - 1 + p%2  // round p to odd (4 → 3 and 3 → 3)
+  }
+  else if (screen_double) {  // the left (even) page
+    x = ev.offsetX * 2*W/cw
+    pp = p + p%2  // round p to even (3 → 4 and 4 → 4)
+  }
+  else {  // single page
+    x = ev.offsetX * W/cw
+    pp = p
+  }
+  return [x, y, pp]
+}
+
+// // show a "help" icon along with the cursor when
+// // moving over ayat numbers, to indicate that
+// // the user can click on it to show the tafsir
+// // (the tafsir is not implemented in Irsaa yet)
+// canvas.addEventListener('mousemove', (ev) => {
+//   const [x, y, pp] = canvas_mouse_to_x_y_p(ev)
+//   for (let i of Q.ayat[pp-1]) {
+//     if (i > w+1) { break }
+//     const [X,Y,W,H] = Q.words[pp-1][i]
+//     if (X <= x && x <= X+W && Y <= y && y <= Y+H) {
+//       canvas.style.cursor = 'help'
+//       return
+//     }
+//   }
+//   canvas.style.cursor = ""
+// }, { passive: true })
+
+canvas.addEventListener('click', (ev) => {
+  if (insert || !audio.can()) { return }
+  const [x, y, pp] = canvas_mouse_to_x_y_p(ev)
+  // dbg_vline(x + (screen_double && pp % 2)*W)
+  // dbg_hline(y)
+  for (let i = 0; i <= w+1 && i < Q.words[pp-1].length; ++i) {
+    const [X,Y,W,H] = Q.words[pp-1][i]
+    if (X <= x && x <= X+W && Y <= y && y <= Y+H) {
+      if (Q.ayat[pp-1].indexOf(i) !== -1) {
+        // todo: show tafsir
+      }
+      else {
+        audio.blink()
+        audio.play(pp, i, 1)  // don't preload any other aaya
+      }
+      return
+    }
+  }
+}, { passive: true })
 
 ////////////////////////////////////////////////////////////////////////////////
 // selectors synchronization with the visible page {{{1
@@ -217,6 +258,8 @@ const Movado = (() => {
     w = ww
     hash_set_pw(p,w)
     // assert_pw()
+    if (helping) { audiopending = true }
+    else { play_or_preload_this() }
     return true
   }
 
@@ -260,6 +303,7 @@ const Movado = (() => {
     w = fn(p, w, page, WordsColor[+screen_dark], MarginColor[+screen_dark], skip_predicate)  // draws on offcanvas, unless it returns Q.words[p-1].length
     ctx.drawImage(w === Q.words[p-1].length ? page : offcanvas, page_offset_in_canvas(p), 0, W, H)
     hash_set_pw(p,w)
+    play_this()
   }
 
   const keyup = () => { held_keydown = 0 }
@@ -354,7 +398,7 @@ const Movado = (() => {
       else if (isNaN(w) || w < 0)       { w = 0 }
       p = Math.floor(p)
       w = Math.floor(w)
-      show_help()
+      nohelp || show_help()
       window.onkeydown = (ev) => { if (ev.key === '*') { ev.preventDefault(); toggle_dark() } }
     },
     init: () => {  // called after all the json data loads
@@ -370,6 +414,8 @@ const Movado = (() => {
 
 ////////////////////////////////////////////////////////////////////////////////
 // selectors {{{1
+
+let page_word_to_sura_aaya
 
 meta_loaded.then(() => {
 
@@ -396,7 +442,16 @@ meta_loaded.then(() => {
     }
   }
 
-  const aaya_offset_to_sura_aaya = (y) => {
+  page_word_to_sura_aaya = (p, w) => {
+    if (p === 187 && w <= 1) { return [9,1] }  // At-Tawba - the only sura not starting with a basmala
+    if (Q.basmalaat[p-1].includes(w) || Q.headers[p-1].includes(w)) { return [1,1] }  // the basmala, for audio
+    const y = Q.page_offset[p-1] + bisect(Q.ayat[p-1], w)
+    const s = sura_of(y + 1)  // 1-based sura
+    const a = y - Q.sura_offset[s-1] + 1
+    return [s, a]
+  }
+
+  const update_sura_aaya_from_aaya_offset = (y) => {
     const s = sura_of(y + 1)  // 1-based sura
     sura_select.value = s - 1
     update_aayat()
@@ -407,17 +462,17 @@ meta_loaded.then(() => {
 
   const page_word_offset_to_sura_aaya = (p, w) => {
     const a = bisect(Q.ayat[p-1], w)
-    aaya_offset_to_sura_aaya( Q.page_offset[p-1] + a )
+    update_sura_aaya_from_aaya_offset( Q.page_offset[p-1] + a )
   }
 
   const sync_sura_aaya = () => {  // with page-line
     const p = +page_select.value      // 1-based page
     const l = +line_select.value - 1  // 0-based line, and -1 means full page (b/c it's numerified from the empty string, before the subtracting one)
     if (l === 0 || !Q.lineends) {  // first line, or the metadata in json hasn't loaded yet
-      aaya_offset_to_sura_aaya( Q.page_offset[p-1] )
+      update_sura_aaya_from_aaya_offset( Q.page_offset[p-1] )
     }
     else if (l === -1 /* full page */) {
-      aaya_offset_to_sura_aaya( Q.page_offset[p] - 1 )
+      update_sura_aaya_from_aaya_offset( Q.page_offset[p] - 1 )
       // ^ start of the next page, minus one to get the last word in the previous page
     }
     else if (Q.ayat && Q.lineends) {  // if loaded
@@ -588,12 +643,13 @@ const window_onkeydown = (ev) => {
   // Note: ev.code is for the physical key, thus ev.code === 'Minus' and ev.code === 'Equal'
   //   are for the two keys immediately to the left of Backspace; ie, Dvorak '[' and ']'.
   //
-  if (ev.altKey || ev.ctrlKey && ev.key !== 'Home' && ev.key !== 'End') { return }
-  // ^ don't handle if alt or ctrl is pressed, unless it's ctrl with Home or End
+  if (ev.altKey || ev.ctrlKey && ev.key !== 'Home' && ev.key !== 'End' && ev.key !== ' ') { return }
+  // ^ don't handle if alt or ctrl is pressed, unless it's ctrl with Home or End or Space
   else if (ev.key === 'Escape') { ev.preventDefault(); on_escape() }
   else if (ev.key === 'F1')     { ev.preventDefault(); toggle_help() }
   else if (ev.key === 'F8')     { ev.preventDefault(); cycle_full_page() }
   else if (ev.key === '*')      { ev.preventDefault(); toggle_dark() }
+  else if (ev.ctrlKey && ev.key === ' ') { ev.preventDefault(); if (audio.can()) { player.play() } }
   else if (ev.target.id === 'txt' || !txt.hidden && !txt.disabled) {
     if (loading || helping) { return }
     else if (ev.code === 'Equal') { ev.preventDefault(); Movado.backward(ev.shiftKey) }

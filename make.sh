@@ -4,15 +4,18 @@ set -eu
 minify_js=true
 minify_css=true
 minify_html=true
-
-# minify_js=false
-# minify_css=false
-# minify_html=false
-
 disabledark=true
 # remove the darkmode js & css, because it's still experimental and thus is disabled by default
 
-# disabledark=false
+# use `make toggle`
+if [ -e .nominify ]; then
+  minify_js=false
+  minify_css=false
+  minify_html=false
+fi
+if [ -e .keepdark ]; then
+  disabledark=false
+fi
 
 _() { printf '%s\n' "$*"; "$@"; }
 
@@ -20,7 +23,9 @@ dist=false
 if [ $# -gt 0 ]; then
   case "$1" in clean|-B|-f)
     _ rm -f index.html .minified.{script,style}
-    _ rm -f .hashes_vars.sh mymeta.json.zst
+    if [ "$1" != -f ]; then
+      _ rm -f .hashes_vars.sh mymeta.json.zst
+    fi
     if [ -e irsaa.html ]; then
       _ rm -f irsaa.html .minified2.{script,style} LOAD.js changelog.html
     fi
@@ -45,7 +50,7 @@ source .hashes_vars.sh
 
 # JAVASCRIPT MINIFICATION
 
-js_opts=(--compress passes=10,toplevel --mangle toplevel --mangle-props "reserved=[$reserved_props]")
+js_opts=(--compress passes=10,toplevel,drop_console --mangle toplevel --mangle-props "reserved=[$reserved_props]")
 # js_opts=(--compress)
 
 js_process() { perl -pe '
@@ -147,7 +152,7 @@ needed() {
   return 1
 }
 
-jss='globalsfree.js init.js load.js aftermeta.js osk.js script.js main.js'
+jss='globalsfree.js init.js load.js aftermeta.js osk.js state.js audio.js script.js main.js'
 
 if needed .minified.script -- $jss .hashes_vars.sh; then
   printf 'Preparing %s... ' 'the script'
