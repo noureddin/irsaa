@@ -31,7 +31,7 @@ if [ $# -gt 0 ]; then
 fi
 
 JS_ENV=UGLIFY_BUG_REPORT
-CSS_ENV=HTTP_PROXY,http_proxy
+CSS_ENV=HTTP_PROXY,http_proxy,__DIRECT__
 
 minjs()  { deno run --quiet --allow-read --allow-env=$JS_ENV  npm:uglify-js "$@"; }
 mincss() { deno run --quiet --allow-read --allow-env=$CSS_ENV npm:clean-css-cli "$@"; }
@@ -96,14 +96,14 @@ else
   css_dark() { cat; }
 fi
 
-# this takes the input file as an argument, not from the stdin
+# this takes the input file as an argument or from the stdin; I use it from the stdin for symmetry
 
-C() { mincss -O2 "$1" | css_dark; }
+C() { mincss -O2 | css_dark; }
 # altho -O2 decreses the byte count of the uncompressed integrated (index.html) file,
 # it sometimes increases the gzipped size slightly. -- always test it!
 
 if ! $minify_css; then
-  C() { css_dark < "$1"; }
+  C() { css_dark; }
 fi
 
 # HTML BASIC MINIFICATION, AND PROCESSING (embedding js & css)
@@ -147,17 +147,17 @@ needed() {
   return 1
 }
 
-if needed .minified.style -- style.css; then
-  printf 'Preparing %s... ' 'the style'
-  C style.css > .minified.style
-  echo done
-fi
-
-jss='globalsfree.js init.js load.js aftermeta.js script.js osk.js main.js'
+jss='globalsfree.js init.js load.js aftermeta.js osk.js script.js main.js'
 
 if needed .minified.script -- $jss .hashes_vars.sh; then
   printf 'Preparing %s... ' 'the script'
   { FZSTD; cat $jss; } | J | JEND > .minified.script
+  echo done
+fi
+
+if needed .minified.style -- style.css; then
+  printf 'Preparing %s... ' 'the style'
+  C < style.css > .minified.style
   echo done
 fi
 

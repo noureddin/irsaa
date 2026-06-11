@@ -51,7 +51,7 @@ data_loaded.then(() => {
     if (!loading && !helping) { focus_word() }
   })
 
-  update_screen_size()
+  onresize()
   Movado.init()
   onhashchange = () => {
     const [pp, ww] = hash_get_pw() || [p, w]
@@ -137,6 +137,6 @@ data_loaded.then(() => {
 
 })
 .catch(() => {  // if failed to load the json data
-  update_screen_size()
+  onresize()
   draw_emptypage(emptypage.datafailed)
 })

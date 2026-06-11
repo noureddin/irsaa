@@ -15,9 +15,7 @@ let __screen_fitscreen = null
 //
 
 const __screen_to_double = () => {
-  __screen_fitscreen === false  // is trilogical (null (=auto), true, false)
-    ? resize_scroll_y(2*W)
-    : resize_fit_screen(2*W)  // if auto fit (in double, it's force-fit)
+  select_fit(__screen_fitscreen, true)  // __screen_fitscreen is trilogical (null (=auto), true, false)
   if (screen_double === true) { return }  // can be undefined
   screen_double = true
   body.classList.add('d')
@@ -27,9 +25,7 @@ const __screen_to_double = () => {
 }
 
 const __screen_to_single = () => {
-  __screen_fitscreen === true  // is trilogical (null (=auto), true, false)
-    ? resize_fit_screen(W)
-    : resize_scroll_y(W)  // if auto fit (in single, it's scroll-y)
+  select_fit(__screen_fitscreen, false)  // __screen_fitscreen is trilogical (null (=auto), true, false)
   if (screen_double === false) { return }  // can be undefined
   screen_double = false
   body.classList.remove('d')
@@ -42,23 +38,37 @@ const toggle_dark = () => { body.classList.toggle('k', (screen_dark = !screen_da
 
 // darkmode images are still experimental and not online yet
 
-const trilogical_from_string = (v) => v === "" ? null : v === 'y'
+const trilogical_from_value = (v) => v === "" ? null : v === 'y'
 
 const set_dark = (d) => { screen_dark = d !== true /* default to lightmode */; toggle_dark() }
 const page_offset_in_canvas = (p) => screen_double && p % 2 ? W : 0
 const right_in_double = (p) => screen_double && p % 2
 const left_in_double = (p) => screen_double && p % 2 == 0
-const resize_canvas = (q) => { __screen_force_double == null && q.matches || __screen_force_double ? __screen_to_double() : __screen_to_single() }
-const update_fontsize = () => { screen_fontsize = parseFloat(getComputedStyle(canvas).height)/32 }
+const resize_canvas = () => {
+  const s_w = window.innerWidth >= sW
+  const s_h = window.innerHeight >= sH
+  const fit = __screen_fitscreen
+  const dbl = __screen_force_double
+  // choose doublepage in three cases:
+  // - double is forced (chosen by the user)
+  // - double is auto, and there is enough screen width and one of the following:
+  //   - fit or scroll is forced (if fit, space would be wasted if a single page is viewed; if scroll, a single page would probably be too big)
+  //   - auto fit/scroll, and there is enough screen height
+  dbl || dbl == null && s_w && (fit != null || fit == null && s_h)
+    ? __screen_to_double() : __screen_to_single()
+}
+const update_fontsize = () => {
+  screen_fontsize = parseFloat(getComputedStyle(canvas).height)/32
+}
 
 const screen_init = () => {
-  double_select.oninput    = () => { __screen_force_double = trilogical_from_string(double_select.value);    update_screen_size() }
-  fitscreen_select.oninput = () => { __screen_fitscreen    = trilogical_from_string(fitscreen_select.value); update_screen_size() }
+  double_select.oninput    = () => { __screen_force_double = trilogical_from_value(double_select.value);    onresize() }
+  fitscreen_select.oninput = () => { __screen_fitscreen    = trilogical_from_value(fitscreen_select.value); onresize() }
   // if the page is reloaded; as these two aren't remembered across sessions
-  __screen_force_double = trilogical_from_string(double_select.value)
-  __screen_fitscreen    = trilogical_from_string(fitscreen_select.value)
+  __screen_force_double = trilogical_from_value(double_select.value)
+  __screen_fitscreen    = trilogical_from_value(fitscreen_select.value)
   // initialize the screen dimensions
-  resize_canvas(wide_screen)  // half of update_screen_size()
+  resize_canvas()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

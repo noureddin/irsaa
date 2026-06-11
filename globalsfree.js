@@ -130,7 +130,20 @@ const pagescroll = document.querySelector('body>.scr')
 const [sura_aaya_go, page_line_go] = document.querySelectorAll('button.go')
 
 // others
-const wide_screen = matchMedia('(width>=1150px) and (height>=800px)')
+// the min width & height at which we choose double-page & fit-screen if no pref
+const sW = 1150
+const sH = 800
+// const wide_screen = matchMedia('(width>=1150px) and (height>=800px)')
+
+// font-sizes involve 1vmin, thus require updating on resize
+let REM, HELPMIN, KK_EM, KK_U
+const update_rem = () => {
+  KK_U = 4  // the #kk --U variable in ems; because it will be user-configurable
+  KK_EM = parseFloat(getComputedStyle(kk).fontSize)
+  REM = parseFloat(getComputedStyle(document.documentElement).fontSize)
+  HELPMIN = 46*REM
+}
+update_rem()
 
 ////////////////////////////////////////////////////////////////////////////////
 // canvases and their consant (never-changing) initializations {{{1
@@ -478,31 +491,71 @@ const Pages = (() => {
 // DOM-manipulation {{{1
 // methods that manipulate certain document elements
 
-// the container (the muṣħaf pages)'s width <= the screen's width.
-// the container's height can be < or == or > the screen's height.
-// the help's width == the container's width - 7%.
-// the help's height == the screen's height.
-
-// note: the constant `kkpos` refers to the input (range), not the div#kkpos containing it.
-//  and we hide it on mobile screen and the like, because it's relevant only to landscape.
-
-// Todo: when fit_screen is forced, help because visibly narrower than the page (even w/o the '*0.93').
 // Todo: check the UX when forcing both doublepage & scroll_y.
 
+const help_onresize = () => {
+  const viewportWidth = window.innerWidth
+  const helpwidth = Math.min(HELPMIN, 0.95*viewportWidth)
+  help.style.width = helpwidth+'px'
+  help.style.right = (viewportWidth - helpwidth) / 2 + 'px'
+  // that can be done in CSS only, but min() is still relatively new (Baseline Jul 2020).
+}
+
+// the container (the muṣħaf pages)'s width <= the screen's width.
+// the container's height can be < or == or > the screen's height.
+
+let resize_screen = () => {}
+
 const resize_fit_screen = (w) => {
-  Qid('kkpos').style.display = ""
-  help.style.setProperty('--w', 'calc('+(
-    container.style.width  = 'min(98vw,' + (w/H*98) + 'vh)')+'*0.93)')
-  body.style.setProperty('--h',
-    container.style.height = 'min(98vh,' + (H/w*98) + 'vw)')
+  body.classList.add('F')
+  const r = w/H
+  resize_screen = () => {
+    const WW = window.innerWidth
+    const HH = window.innerHeight
+    let ww,hh
+    if (WW < r*HH) {
+      ww = 0.98*WW
+      hh = ww/r
+    }
+    else {
+      hh = 0.98*HH
+      ww = r*hh
+    }
+    container.style.width = ww+'px'
+    container.style.height = hh+'px'
+    body.style.setProperty('--b', (HH-hh)+'px')
+  }
+  resize_screen()
 }
 
 const resize_scroll_y = (w) => {
-  Qid('kkpos').style.display = 'none'
-  help.style.setProperty('--w',
-    container.style.width = '98vw')
-  body.style.setProperty('--h',
-    container.style.height = (H/w*98)+'vw')
+  body.classList.remove('F')
+  resize_screen = () => {
+    const WW = window.innerWidth
+    const HH = window.innerHeight
+    const ww = 0.98*WW
+    const hh = H/w * ww
+    container.style.width = ww+'px'
+    container.style.height = hh+'px'
+    body.style.setProperty('--b', (HH-hh)+'px')
+  }
+  resize_screen()
+}
+
+const canvas_wh = () => {
+  const sty = getComputedStyle(canvas)
+  return [ parseFloat(sty.width), parseFloat(sty.height) ]
+}
+
+const select_fit = (fit, double) => {
+  // fit: null (auto), true (force fit_screen), false (force scroll_y)
+  const w = double ? 2*W : W
+  // choose fit_screen in three cases:
+  // - fit === true (ie, the user asked for fit_screen)
+  // - auto fit/scroll, and doublepage
+  // - auto fit/scroll, and singlepage, and window height >= sH (see its comment)
+  fit || fit == null && (double || window.innerHeight >= sH)
+    ? resize_fit_screen(w) : resize_scroll_y(w)
 }
 
 const update_scrollshadows = () => {

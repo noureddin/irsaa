@@ -58,7 +58,6 @@ body>.scr { background: inherit }  /* to be grayscaled when showing help */
 body.nocursor #canvas { cursor: none }  /* hide when using the keyboard */
 
 #n, #h {
-  /* for width & height, see resize_canvas() in javascript */
   margin: 1vh auto;
   position: relative;
 }
@@ -115,25 +114,26 @@ body.k #h a:focus { outline: 0.15em dotted orange }
 svg * { transition: 0.25s fill, 0.25s stroke }
 
 #kk {
+  cursor: pointer;
+  --U: 4em;  /* button side length with margin; will be user-configurable */
+  /* */
   visibility: hidden;
   font-family: NotoSymbols, sans-serif;
+  /* */
   /* lightmode colors */
   /* --bg: transparent; */
   --c: #a00;  /* keys color */
   --s: #fff;
-  --hover: #fff8;
-  --active: #ffff;
+  /* */
+  opacity: 0.10; transition: opacity 1.5s ease-in-out;
 }
 body.k #kk { /* darkmode colors */
   /* --bg: #18003044; */
   /* --c: #fff8;  /1* keys color *1/ */
   --c: #fdd;
   --s: #000;
-  --hover: #fff6;
-  --active: #fffa;
 }
 
-#kk        { opacity: 0.10; transition: opacity 1.5s ease-in-out }
 @media (hover: hover) {
   #kk:hover { opacity: 0.50; transition: opacity 0.2s ease-out }
 }
@@ -156,50 +156,34 @@ svg, button {
    keypad's height is needed for calculating its position.
 */
 
-#kk {
-  --U: 1vw; /* changed to 2vh whenever 1vw is greater */
-}
-
 svg {
   /* background: var(--bg); */
-  height: calc(var(--F)*var(--H)*var(--U));
+  height: var(--H);
   /* portrait (scroll-y) */
-  --F: 2.5;
   position: fixed;
-  top: var(--h);
-  top: min(var(--h), calc(100vh - var(--F)*var(--H)*var(--U)));
-  /* immediately under the canvas if there's a space, otherwise at the bottom screen */
+  bottom: 0;
+  bottom: max(0vh, calc(var(--b) - var(--H)));
+  /* --T: calc(100vh - var(--H)); */
+  /* top: min(var(--h), var(--T)); */
+  /* immediately under the canvas if there's a space, otherwise at the bottom of screen */
+  /* but if the browser is too old to understand min(), just put it at the bottom of screen */
 }
 
-body.d svg { /* landscape (screen-fit) */
-  --F: 1;
-  position: absolute;
-}
-body.d #kk.T svg { top: 5vh }
-body.d #kk.M svg { top: calc(45vh - var(--H)*var(--U)/2) }
-body.d #kk.B svg { top: calc(95vh - var(--H)*var(--U)) }
-/* note: no var(--F) because it equals 1 here (body.d) */
+body.V svg { position: absolute } /* see onresize() & kkfix.oninput() */
+body.V #kk.T svg { bottom: initial; top: 8vw /* under the show help bottom */ }
+body.V.d #kk.T svg { top: 0 }
+body.V #kk.M svg { bottom: initial; top: calc(45vh - var(--H)/2) }
+body.V #kk.B svg { bottom: 0 }
 
-#kk { cursor: pointer }
+/* for some browsers, top: calc(95vh - var(--H)) renders half the element out of the screen, thus bottom is needed */
 
-#kk.G svg { --H: 18 } /* manette layout */
-#kk.S svg { --H: 12 } /* square layout */
-#kk.L svg { --H: 24 } /* laptop layout */
 
-/* #kk.G svg { --H: 18; border-radius: 100% }  /1* manette layout *1/ */
-/* /1* #kk.P svg { --H: 12; border-radius: 1em }   /2* triangle layout *2/ *1/ */
-/* #kk.S svg { --H: 12; border-radius: 0.5em } /1* square layout *1/ */
-/* #kk.L svg { --H: 24; border-radius: 0.5em } /1* laptop layout *1/ */
+#kk.S svg { --H: calc(2*var(--U)) } /* square layout */
+#kk.G svg { --H: calc(3*var(--U)) } /* manette layout */
+#kk.L svg { --H: calc(4*var(--U)) } /* laptop layout */
 
-#rk {
-  /* right: max(0px, calc(50vw - 50vmin - 25vmin)); */
-  right: 0;
-}
-
-#lk {
-  /* left: max(0px, calc(50vw - 50vmin - 25vmin)); */
-  left: 0;
-}
+#rk { right: 0 }
+#lk { left: 0 }
 
 #kk.R #rk { right: initial; left: 0 }
 #kk.R #lk { left: initial; right: 0 }
@@ -213,14 +197,18 @@ body.d #kk.B svg { top: calc(95vh - var(--H)*var(--U)) }
 /* #lk { left:  5.25vmin } */
 /* } */
 
+/* keys */
+
 #kk g * { user-select: none; }  /* it's easy to select it while clicking */
 
 @media (hover: hover) {
   #kk g:hover * { cursor: pointer }
   #kk g:hover { filter: drop-shadow(0 0 0.02em red); }
-  #kk g:hover>rect { fill: var(--hover) }
+         #kk g:hover>rect { fill: #fff8 }
+  body.k #kk g:hover>rect { fill: #fff6 }
 }
-#kk g:active>rect { fill: var(--active) }
+       #kk g:active>rect { fill: #ffff }
+body.k #kk g:active>rect { fill: #fffa }
 
 #kk g>rect {
   width: 8px;
@@ -272,7 +260,7 @@ body.d #sh {
   --f: 1em; top: 2.5%;
   opacity: 0.25;  /* it's an empty space, thus can get more translucent */
   /* TODO: unify the font-family & border style of this button across Gecko/Blink */
-  /* the 0.18% offset to the left is needed because the inner margins of the pages
+  /* the +0.18% offset to the left is needed because the inner margins of the pages
      aren't perfectly symmetric between the right and left pages */
   right: calc(50.18% - var(--f));
 }
@@ -280,7 +268,7 @@ body.d #sh {
 #x {
   display: block;
   position: absolute;
-  --f: min(5vmin, 1em);
+  --f: 1em;
   top: 1em; left: 1em;
   opacity: 0.35;
   transition: 0.5s opacity;
@@ -330,9 +318,7 @@ hr {
   display: none;
   position: absolute;
   box-sizing: border-box;
-  --w: 100%;  /* changed in javascript; see resize_fit_screen() & resize_scroll_y() */
-  top: 1.25%; right: calc((100% - var(--w, 100%) + 5%) / 2);
-  width: calc(var(--w, 100%) - 5%); height: 95%;
+  top: 1.25%; height: 95%; /* right & width are set by calling help_onresize() in onresize() */
   background: #e0e0e4aa;
   padding: 0.5em;
   border-radius: 1em;
@@ -489,12 +475,12 @@ body.k select, body.k button { filter: invert(0.85) }
 select.go1 { width: 4.5em }
 select.go2 { width: 3em }
 
-#o select { width: var(--w) }
+#o select { width: var(--W) }
 #o > li {
   list-style: none;
   margin: 0.5em -2em 1em 0;
-  --w: 11em;
-  width: calc(var(--w) + 8em);
+  --W: 11em;
+  width: calc(var(--W) + 8em);
   text-align: left;
 }
 

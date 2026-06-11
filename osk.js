@@ -2,6 +2,8 @@
 
 let kkfullpage = false
 let kkopaquetap = true
+let kkfixedbottom = false
+let __osk_auto_lay = null
 
 // show & hide {{{1
 
@@ -93,8 +95,9 @@ const move_osk_btn = (key, x, y) => {  // {{{
   }
 }  // }}}
 
+
 const osk_laptop = (from_auto) => {  // a column like many laptops' home/pageup/pagedn/end keys
-  if (!from_auto) { window.osk_onresize = null }
+  if (!from_auto) { __osk_auto_lay = null }
   //
   kk.classList.remove(...kklayclasses)
   kk.classList.add('L')
@@ -113,7 +116,7 @@ const osk_laptop = (from_auto) => {  // a column like many laptops' home/pageup/
 }
 
 const osk_manette = (from_auto) => {
-  if (!from_auto) { window.osk_onresize = null }
+  if (!from_auto) { __osk_auto_lay = null }
   //
   kk.classList.remove(...kklayclasses)
   kk.classList.add('G')
@@ -132,7 +135,7 @@ const osk_manette = (from_auto) => {
 }
 
 // const osk_triangle = (from_auto) => {
-//   if (!from_auto) { window.osk_onresize = null }
+//   if (!from_auto) { __osk_auto_lay = null }
 //   //
 //   kk.classList.remove(...kklayclasses)
 //   kk.classList.add('P')
@@ -151,7 +154,7 @@ const osk_manette = (from_auto) => {
 // }
 
 const osk_square = (from_auto) => {
-  if (!from_auto) { window.osk_onresize = null }
+  if (!from_auto) { __osk_auto_lay = null }
   //
   kk.classList.remove(...kklayclasses)
   kk.classList.add('S')
@@ -170,23 +173,37 @@ const osk_square = (from_auto) => {
 }
 
 const osk_autolay = () => {
-  window.osk_onresize = () => {
-    const ws = pagescroll.clientWidth
-    const wc = canvas.clientWidth
-    const hs = pagescroll.clientHeight
-    const hc = canvas.clientHeight
-    if (hc > wc) {  // portrait; check heights
-      (hs - hc) / hc > 1/7
-        ? osk_manette(true)
-        : osk_square(true)
+  __osk_auto_lay = () => {
+    if (kkfixedbottom) {
+      const hs = pagescroll.clientHeight
+      const hc = canvas.clientHeight
+      const can_has_manette = pagescroll.clientWidth > 2*3*KK_U*KK_EM  // if there is enough width for the manette
+      ;(hs - hc) / hc > 0.25 && can_has_manette ? osk_manette(1) : osk_square(1)
+      // the manette requires ~380px in width on narrow screens, and I support screen widths down to about ~400px.
+      // I don't check if there is enough width for the square because it needs ~220px.
     }
-    else {  // landscape; check widths
-      (ws - wc) / wc > 1/4
-        ? osk_manette(true)
-        : osk_laptop(true)
+    else {
+      //
+      const ws = pagescroll.clientWidth
+      const wc = canvas.clientWidth
+      const widthratio = (ws - wc) / wc
+      // console.log(ws, wc, Math.round((ws - wc)/wc*100)/100, " ", hs, hc, Math.round((hs - hc)/hc*100)/100)
+      if (body.classList.contains('F')) {  /* fit_screen */
+        screen_double
+          ? widthratio > 0.25 ? osk_manette(1) : osk_laptop(1)
+          : widthratio > 0.75 ? osk_manette(1) : osk_laptop(1)
+      }
+      else {  /* scroll_y (and free-moving (ie, on the sides) not stuck at the bottom) */
+        osk_laptop(1)
+      }
     }
   }
-  window.osk_onresize()
+  __osk_auto_lay()
+}
+
+const osk_onresize = () => {
+  update_kkfixedbottom()
+  if (__osk_auto_lay) { __osk_auto_lay() }
 }
 
 const set_kk_pos = (i) => {
@@ -201,8 +218,29 @@ const kkvis = Qid('k-v')
 const kkful = Qid('k-f')
 const kkrev = Qid('k-r')
 const kklay = Qid('k-l')
+const kkfix = Qid('k-x')
 const kkpos = Qid('k-p')
 const kkpos_reset = document.querySelector('#kkpos button')
+
+// kkfix {{{2
+
+const update_kkfixedbottom = () => {
+  // if the osk is made stuck to the bottom (not free moving),
+  // or it's auto but the page is scroll-y (not fit-screen),
+  // or it's auto and the page is fit-screen but is shorter than the screen.
+  kkfixedbottom =
+    kkfix.value === 's' ||
+    kkfix.value === "" && (!body.classList.contains('F') ||
+      parseFloat(getComputedStyle(canvas).height) < 0.95*window.innerHeight)
+  body.classList.toggle('V', !kkfixedbottom)
+  // note: the constant `kkpos` refers to the input (range),
+  // not the div#kkpos containing it. and we hide it when it's irrelevant.
+  Qid('kkpos').style.display = kkfixedbottom ? 'none' : ""
+}
+
+kkfix.checked = load_boolean_default_false('kx')
+kkfix.oninput = osk_onresize
+kkfix.oninput()
 
 // kkpos {{{2
 
@@ -223,9 +261,9 @@ if ('kp' in localStorage) {
     kkpos.value = kpi
     kkpos_reset.disabled = (kpi == kkpos_default)
   }
-  else { kkpos_reset.click() }
+  else { kkpos_reset.onclick() }
 }
-else { kkpos_reset.click() }
+else { kkpos_reset.onclick() }
 
 kkpos.oninput = () => {
   set_kk_pos(kkpos.value)
@@ -283,6 +321,7 @@ kkvis.oninput()
 const store_osk_prefs = () => {
   store_if_notdefault('kp', kkposclasses[kkpos.value], kkposclasses[kkpos_default])
   store_if_notdefault('kl', kklay.value, "")
+  store_if_notdefault('kx', kkfix.value, "")
   store_boolean_default_false('kr', kkrev.checked)
   store_boolean_default_false('kf', kkful.checked)
   store_boolean_default_false('kV', !kkvis.checked)

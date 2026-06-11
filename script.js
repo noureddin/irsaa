@@ -76,29 +76,6 @@ const preload4 = (a,b,c,d) =>
 
 // inits based on screen {{{1
 
-onresize = () => {
-  requestAnimationFrame(() => {
-    window.innerWidth > 2*window.innerHeight
-      ? kk.style.setProperty('--U', '2vh')
-      : kk.style.setProperty('--U', '1vw')
-    if (window.osk_onresize) { window.osk_onresize() }
-    if (helping) {
-      // a second delay is apparently needed for this
-      requestAnimationFrame(update_scrollshadows)
-    }
-    // a delay is needed sometimes to get the right dimensions
-    update_fontsize()
-    txt.resize()
-  })
-}
-
-const update_screen_size = () => {
-  resize_canvas(wide_screen)
-  onresize()
-}
-
-wide_screen.onchange = resize_canvas
-
 txt.resize = () => {
   let s = screen_fontsize
   txt.style.fontSize = s + 'px'
@@ -106,6 +83,22 @@ txt.resize = () => {
     txt.style.fontSize = (s /= 1.05) + 'px'
     if (s < 16) { break }
   }
+}
+
+onresize = () => {
+  // a delay is needed sometimes to get the right dimensions
+  requestAnimationFrame(() => {
+    // a second delay is apparently needed for this
+    if (helping) { requestAnimationFrame(update_scrollshadows) }
+    //
+    update_rem()
+    resize_canvas()
+    help_onresize()
+    resize_screen()
+    update_fontsize()
+    txt.resize()
+    osk_onresize()
+  })
 }
 
 // ui-related functions {{{1
@@ -575,10 +568,17 @@ const cycle_full_page = () => {
   }
 }
 
-const on_escape = () =>
+let last_onescape_call = null
+const on_escape = () => {
+  const now = performance.now()
+  const skip = last_onescape_call != null && now - last_onescape_call < 150
+  last_onescape_call = now
+  if (skip) { return }
+  // throttling is needed, otherwise a single Escape can easily toggle the help twice
   helping ? hide_help() :
   insert ? to_normal() :
     show_help()
+}
 
 const toggle_help = () => helping ? hide_help() : show_help()
 
