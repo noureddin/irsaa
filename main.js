@@ -57,7 +57,7 @@ draw_emptypage(emptypage.dataloading)
 data_loaded.then(() => {
 
   body.addEventListener('mouseup', (ev) => {
-    if (!loading && !helping && body.classList.contains('F')) { focus_word() }
+    if (!loading && !has_popup && body.classList.contains('F')) { focus_word() }
   })
 
   onresize()
@@ -77,7 +77,7 @@ data_loaded.then(() => {
   init_osk()  // set up onscreen keys
 
   canvas.ondblclick = () => {
-    if (!helping && !loading) {
+    if (!has_popup && !loading) {
       insert ? to_normal() : to_insert()
     }
   }
@@ -88,7 +88,7 @@ data_loaded.then(() => {
     // https://developer.mozilla.org/en-US/docs/Web/API/Document/scroll_event
     let ticking = 0  // using 0 & 1 here instead of false & true actually reduces the compressed script size
     canvas.onwheel = (ev) => {
-      if (!insert && !loading && !helping) {  // ignore non-normal mode
+      if (!insert && !loading && !has_popup) {  // ignore non-normal mode
         ev.preventDefault()
       }
       else { return }
@@ -96,7 +96,7 @@ data_loaded.then(() => {
       if (!ticking) { // throttle the event
         setTimeout(() => {
           // the actual handler
-          if (!insert && !loading && !helping) {  // ignore non-normal mode
+          if (!insert && !loading && !has_popup) {  // ignore non-normal mode
             const bypixels = ev.deltaMode === 0
             if      (bypixels ? ev.deltaY >=  5 : ev.deltaY > 0) { Movado.forward() }
             else if (bypixels ? ev.deltaY <= -5 : ev.deltaY < 0) { Movado.backward() }
@@ -113,13 +113,13 @@ data_loaded.then(() => {
   try {
     let x
     ontouchstart = (ev) => {
-      if (insert || loading || helping || ev.touches.length > 1) { x = null; y = null; return }  // ignore non-normal mode & zooming gestures
+      if (insert || loading || has_popup || ev.touches.length > 1) { x = null; y = null; return }  // ignore non-normal mode & zooming gestures
       const t = ev.changedTouches[0]
       x = t.pageX
       Movado.keyup()
     }
     ontouchmove = (ev) => {
-      if (insert || loading || helping || ev.touches.length > 1) { x = null; y = null; return } // ignore non-normal mode & zooming gestures
+      if (insert || loading || has_popup || ev.touches.length > 1) { x = null; y = null; return } // ignore non-normal mode & zooming gestures
       const t = ev.changedTouches[0]
       let dx = x - t.pageX  // right is negative! because this is Arabic
       // ignore tiny swipes (a kind of throttling); otherwise it'd move too fast

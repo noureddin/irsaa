@@ -72,7 +72,7 @@ onresize = (ev) => {
   // a delay is needed sometimes to get the right dimensions
   requestAnimationFrame(() => {
     // a second delay is apparently needed for this
-    if (helping) { requestAnimationFrame(update_scrollshadows) }
+    if (has_popup) { requestAnimationFrame(update_scrollshadows) }
     //
     update_rem()
     body.style.setProperty('--M', '100%')
@@ -82,7 +82,7 @@ onresize = (ev) => {
     })
     //
     resize_canvas()
-    help_onresize()
+    popup_onresize()
     resize_screen()
     update_fontsize()
     txt.resize()
@@ -113,20 +113,20 @@ const to_insert = () => {
   update_input(p, w, insert, screen_double)
 }
 
-const show_help = () => {
-  helping = true
-  sync_selectors(p, w)
-  body.classList.add('h')
+const show_popup = (cls) => {
+  has_popup = true
+  if (cls === 'h') { sync_selectors(p, w) }
+  body.classList.add('u', cls)
   update_scrollshadows()
   txt.disabled = true
   kk.style.visibility = 'hidden'
-  document.querySelector('select').focus()
+  if (cls === 'h') { document.querySelector('select').focus() }
   if (player.paused) { audio.hide() }
 }
 
-const hide_help = (focus=true) => {
-  helping = false
-  body.classList.remove('h')
+const hide_popup = (focus=true) => {
+  has_popup = false
+  body.classList.remove('u', 'h', 'c')
   if (!loading) {
     kk.style.visibility = 'visible'
     txt.disabled = false
@@ -148,7 +148,7 @@ const disable_input = () => {  // disable in-page input during page loading
 const enable_input = () => {
   // if, while showing help, the window is resized enough to switch between single/double,
   // it'll call redraw(), which calls update_page(), which calls this.
-  if (!helping) {
+  if (!has_popup) {
     kk.style.visibility = 'visible'
     txt.disabled = false
     focus_word()
@@ -161,9 +161,9 @@ const enable_input = () => {
 ////////////////////////////////////////////////////////////////////////////////
 // some event bindings {{{1
 
-Qid('sh').onclick = show_help
-Qid('x').onclick = hide_help
-Qid('b').onclick = hide_help
+Qid('sh').onclick = () => show_popup('h')
+Qid('x').onclick = hide_popup
+Qid('b').onclick = hide_popup
 
 const canvas_mouse_to_x_y_p = (ev) => {
   const sty = getComputedStyle(canvas)
@@ -275,7 +275,7 @@ const Movado = (() => {
     hash_set_pw(p,w)
     // assert_pw()
     if (withaudio) {
-      if (helping) { audiopending = true }
+      if (has_popup) { audiopending = true }
       else { play_or_preload_this() }
     }
     return true
@@ -416,7 +416,7 @@ const Movado = (() => {
       else if (isNaN(w) || w < 0)       { w = 0 }
       p = Math.floor(p)
       w = Math.floor(w)
-      nohelp || show_help()
+      nohelp || show_popup('h')
       window.onkeydown = (ev) => { if (ev.key === '*') { ev.preventDefault(); toggle_dark() } }
     },
     init: () => {  // called after all the json data loads
@@ -518,7 +518,7 @@ meta_loaded.then(() => {
   line_select.oninput = () => { sync_sura_aaya() }
 
   sura_aaya_go.onclick = async () => {
-    hide_help(false)  // don't focus input, because it'll be changed
+    hide_popup(false)  // don't focus input, because it'll be changed
     await data_loaded
     // const aya = Q.sura_offset[+sura_select.value] + +aaya_select.value
     // const p = page_of(aya)
@@ -528,7 +528,7 @@ meta_loaded.then(() => {
   }
 
   page_line_go.onclick = async () => {
-    hide_help(false)  // don't focus input, because it'll be changed
+    hide_popup(false)  // don't focus input, because it'll be changed
     await data_loaded
     const p = +page_select.value
     const a = Q.page_offset[p-1]
@@ -639,16 +639,19 @@ const on_escape = () => {
   last_onescape_call = now
   if (skip) { return }
   // throttling is needed, otherwise a single Escape can easily toggle the help twice
-  helping ? hide_help() :
+  has_popup ? hide_popup() :
   insert ? to_normal() :
-    show_help()
+    show_popup('h')
 }
 
-const toggle_help = () => helping ? hide_help() : show_help()
+const showing_help = () => body.classList.contains('h')
+
+const toggle_help = () => showing_help() ? hide_popup() : show_popup('h')
 
 const window_onkeyup = Movado.keyup
 
 const window_onkeydown = (ev) => {
+  const helping = showing_help()
   // Note: ev.code is for the physical key, thus ev.code === 'Minus' and ev.code === 'Equal'
   //   are for the two keys immediately to the left of Backspace; ie, Dvorak '[' and ']'.
   //
@@ -664,18 +667,18 @@ const window_onkeydown = (ev) => {
   else if (ev.ctrlKey && ev.key === 'ArrowRight') { ev.preventDefault(); audio.seekforward() }
   else if (ev.ctrlKey && ev.key === 'ArrowLeft')  { ev.preventDefault(); audio.seekbackward() }
   else if (ev.target.id === 'txt' || !txt.hidden && !txt.disabled) {
-    if (loading || helping) { return }
+    if (loading || has_popup) { return }
     else if (ev.code === 'Equal') { ev.preventDefault(); Movado.backward(ev.shiftKey) }
     else if (ev.code === 'Minus') { ev.preventDefault(); Movado.forward(ev.shiftKey) }
     else if (ev.ctrlKey && ev.key === 'Home') { ev.preventDefault(); page_home() }
     else if (ev.ctrlKey && ev.key === 'End')  { ev.preventDefault(); page_end()  }
-    else if (ev.key === 'Tab') { ev.preventDefault(); show_help() }
+    else if (ev.key === 'Tab') { ev.preventDefault(); show_popup('h') }
     else if (ev.key === 'PageDown')  { ev.preventDefault(); ev.shiftKey ? next_full() : next_empty() }
     else if (ev.key === 'PageUp')    { ev.preventDefault(); ev.shiftKey ? prev_full() : prev_empty() }
     return  // don't handle anything else if in insert mode
   }
   //
-  else if (!helping && ev.key === 'Tab') { ev.preventDefault(); show_help() }
+  else if (!has_popup && ev.key === 'Tab') { ev.preventDefault(); show_popup('h') }
   else if (helping && ev.key === 'Enter') {  // next element in the go-to selectors (not the options)
     if      (ev.target === sura_select) { ev.preventDefault();  aaya_select.focus() }
     else if (ev.target === aaya_select) { ev.preventDefault(); sura_aaya_go.focus() }
@@ -690,7 +693,7 @@ const window_onkeydown = (ev) => {
     // Backspacing across rows (ie, from page_select to sura_aaya_go) is intentionally not allowed,
     // because it lacks the Enter counterpart ('Enter' on sura_aaya_go going to the next row, ie, to page_select).
   }
-  else if (helping && ev.target.tagName === 'SELECT') {
+  else if (has_popup && ev.target.tagName === 'SELECT') {
     if (ev.key === 'ArrowLeft') {  // select next
       ev.preventDefault()
       if (ev.target.selectedIndex < ev.target.options.length-1) {
@@ -706,7 +709,7 @@ const window_onkeydown = (ev) => {
       }
     }
   }
-  else if (helping) { return }  // don't handle anything else if showing help
+  else if (has_popup) { return }  // don't handle anything else if showing help or another popup
   //
   else if (ev.key === 'PageDown')  { ev.preventDefault(); ev.shiftKey ? next_full() : next_empty() }
   else if (ev.key === 'PageUp')    { ev.preventDefault(); ev.shiftKey ? prev_full() : prev_empty() }

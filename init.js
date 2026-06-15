@@ -116,16 +116,18 @@ if (!nostats) {
 // scroll shadows in the help/options
 ;(() => {
   // https://developer.mozilla.org/en-US/docs/Web/API/Document/scroll_event
-  let ticking = false
-  helpscroll.addEventListener('scroll', (ev) => {
-    if (!ticking) { // throttle the event
-      setTimeout(() => {
-        update_scrollshadows()  // the actual handler
-        ticking = false
-      }, 20)
-      ticking = true
-    }
-  }, { passive: true })
+  for (let el of document.querySelectorAll('#u > .scr')) {
+    let ticking = false
+    el.addEventListener('scroll', (ev) => {
+      if (!ticking) { // throttle the event
+        setTimeout(() => {
+          update_scrollshadows()  // the actual handler
+          ticking = false
+        }, 20)
+        ticking = true
+      }
+    }, { passive: true })
+  }
 })()
 
 // auto-hide cursor

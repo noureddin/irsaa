@@ -47,7 +47,7 @@ const audio = (() => {
       }
       //
       const can = audio.can()
-      can && !helping ? audio.show() : audio.hide()
+      can && !has_popup ? audio.show() : audio.hide()
       //
       if (player.src) {
         if (can) {

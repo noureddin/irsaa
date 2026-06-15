@@ -71,7 +71,6 @@ const nostats = get_url_pref('nostats', 'stats')
 const nohelp = get_url_pref('nohelp', 'help')
 const wantdark = get_url_pref('d dark', 'l light')  // this line is removed if darkmode is disabled -- don't change this comment
 const wantnormal = get_url_pref('n normal', 'i insert')
-// todo: a pref to not show help
 
 // const nostats = location.search.split(/[?&]/).includes('nostats')
 
@@ -140,7 +139,7 @@ const make_option = (val, txt) => {
 // essential elements
 const txt = Qid('t')
 const container = Qid('n')
-const help = Qid('h')
+const popup = Qid('u')
 
 // audio-related
 const player = Qid('player')
@@ -165,7 +164,7 @@ const double_select = Qid('d')
 const fitscreen_select = Qid('f')
 const upper_scrollshadow = Qid('hs')
 const lower_scrollshadow = Qid('ls')
-const helpscroll = document.querySelector('#h>.scr')
+const helpscroll = Qid('h')
 const pagescroll = document.querySelector('body>.scr')
 const [sura_aaya_go, page_line_go] = document.querySelectorAll('button.go')
 
@@ -176,12 +175,12 @@ const sH = 800
 // const wide_screen = matchMedia('(width>=1150px) and (height>=800px)')
 
 // font-sizes involve 1vmin, thus require updating on resize
-let REM, HELPMIN, KK_EM, KK_U
+let REM, POPUP_MIN_WIDTH, KK_EM, KK_U
 const update_rem = () => {
   KK_U = 4  // the #kk --U variable in ems; because it will be user-configurable
   KK_EM = parseFloat(getComputedStyle(kk).fontSize)
   REM = parseFloat(getComputedStyle(document.documentElement).fontSize)
-  HELPMIN = 46*REM
+  POPUP_MIN_WIDTH = 46*REM
 }
 update_rem()
 
@@ -537,14 +536,14 @@ const Pages = (() => {
 // DOM-manipulation {{{1
 // methods that manipulate certain document elements
 
-const help_onresize = () => {
+const popup_onresize = () => {
   const viewportWidth = window.innerWidth
-  const helpwidth = Math.min(HELPMIN, 0.95*viewportWidth)
-  help.style.width = helpwidth+'px'
-  help.style.right = (viewportWidth - helpwidth) / 2 + 'px'
+  const popupwidth = Math.min(POPUP_MIN_WIDTH, 0.95*viewportWidth)
+  popup.style.width = popupwidth+'px'
+  popup.style.right = (viewportWidth - popupwidth) / 2 + 'px'
   // that can be done in CSS only, but min() is still relatively new (Baseline Jul 2020).
 }
-help_onresize()
+popup_onresize()
 
 // the container (the muṣħaf pages)'s width <= the screen's width.
 // the container's height can be < or == or > the screen's height.
@@ -604,11 +603,15 @@ const select_fit = (fit, double) => {
 }
 
 const update_scrollshadows = () => {
+  const scrollarea
+    = body.classList.contains('h') ? helpscroll
+    : null
+  if (!scrollarea) { return }
   upper_scrollshadow.style.opacity =
-    helpscroll.scrollTop === 0
+    scrollarea.scrollTop === 0
       ? '0' : '1'
   lower_scrollshadow.style.opacity =
-    Math.round(helpscroll.scrollTop + helpscroll.clientHeight + 1) >= Math.round(helpscroll.scrollHeight)
+    Math.round(scrollarea.scrollTop + scrollarea.clientHeight + 1) >= Math.round(scrollarea.scrollHeight)
       ? '0' : '1'  // ^ this +1 is needed for Blink ¯\_(ツ)_/¯
 }
 
@@ -616,9 +619,9 @@ const update_scrollshadows = () => {
 
 const scroll_debuglines = async (top, bottom) => {
   // debuglines
-  helping = true  // to not call scroll_into_view again (inifite recursion)
+  has_popup = true  // to not call scroll_into_view again (inifite recursion)
   await update_page(screen_dark, p, w)
-  helping = false
+  has_popup = false
   hline(ctx, 0, W, top/pagescroll.scrollHeight*H, 'hotpink')
   hline(ctx, 0, W, bottom/pagescroll.scrollHeight*H, 'limegreen')
 }

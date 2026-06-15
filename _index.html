@@ -23,133 +23,133 @@
   </div>
 </div>
 <div id="b"></div><!-- block the scolling when showing help, and accept a click to close the help -->
-<div id="h"><!-- help & options -->
+<div id="u"><!-- popup -->
   <button id="x">X</button>
   <div id="hs"></div><!-- upper scroll-shadows -->
   <div id="ls"></div><!-- lower scroll-shadows -->
-  <div class="scr"><!-- scrollable area -->
-  <h1>إرساء <span class="i"><span>&mdash;</span></span> مصحف&nbsp;تفاعلي لاختبار&nbsp;الحفظ</h1>
-  <p class="nt">أظهر هذه الشاشة في أي وقت بضغط <nobr>زر <kbd>F1</kbd></nobr> أو <nobr>زر <kbd>Tab</kbd></nobr> في لوحة المفاتيح، أو <nobr>زر <span class="sh"><button disabled>؟</button><span></span></span></nobr> الذي في أعلى الشاشة.</p>
-  <div class="t g"><!-- table -->
-    <div>
-      <div>انتقل إلى:</div>
-      <label>سورة:&thinsp;<select class="go1" id="s"></select></label>
-      <label>آية:&thinsp;<select class="go2" id="a"></select></label>
-      <div class="btn"><button class="go">اذهب</button></div>
+  <div class="scr" id="h"><!-- scrollable area of help and options -->
+    <h1>إرساء <span class="i"><span>&mdash;</span></span> مصحف&nbsp;تفاعلي لاختبار&nbsp;الحفظ</h1>
+    <p class="nt">أظهر هذه الشاشة في أي وقت بضغط <nobr>زر <kbd>F1</kbd></nobr> أو <nobr>زر <kbd>Tab</kbd></nobr> في لوحة المفاتيح، أو <nobr>زر <span class="sh"><button disabled>؟</button><span></span></span></nobr> الذي في أعلى الشاشة.</p>
+    <div class="t g"><!-- table -->
+      <div>
+        <div>انتقل إلى:</div>
+        <label>سورة:&thinsp;<select class="go1" id="s"></select></label>
+        <label>آية:&thinsp;<select class="go2" id="a"></select></label>
+        <div class="btn"><button class="go">اذهب</button></div>
+      </div>
+      <div>
+        <div>أو:</div>
+        <label>صفحة:&thinsp;<select class="go1" id="p"></select></label>
+        <label>سطر:&thinsp;<select class="go2" id="l"></select></label>
+        <div class="btn"><button class="go">اذهب</button></div>
+      </div>
     </div>
-    <div>
-      <div>أو:</div>
-      <label>صفحة:&thinsp;<select class="go1" id="p"></select></label>
-      <label>سطر:&thinsp;<select class="go2" id="l"></select></label>
-      <div class="btn"><button class="go">اذهب</button></div>
-    </div>
+    <details id="q"><summary>تلاوة صوتية:</summary><p>يجري تحميل أسماء التلاوات الصوتية…</p>
+      <div class="t"><!-- table -->
+      <div><label for="qp">موضع المشغِّل:&thinsp;</label><div><select id="qp">
+        <option value="">متوسط في الأسفل</option>
+        <option value="t">متوسط في الأعلى</option>
+      </select></div></div>
+      <div><label for="qs">أسلوب الاستماع:&thinsp;</label><div><select id="qs">
+        <option value="a">بعد إتمام كل آية</option>
+        <option value="b">قبل بدء كل آية</option>
+        <option value="">عند النقر على الآية فقط</option>
+      </select></div></div>
+      </div>
+    </details>
+    <hr>
+    <details><summary>للتسميع أسلوبان: إظهار الكلمات بالأسهم، وبالكتابة.</summary>
+      <p>ويمكن التبديل بينهما وقتما شئت:</p><ul>
+        <li>زر الإدخال (<kbd>Enter</kbd>) في التسميع بالإظهار يجعل التسميع بالكتابة.
+        <li>زر الخروج (<kbd>Escape</kbd>) في التسميع بالكتابة يجعل التسميع بالإظهار.
+        <li>النقر المزدوج (خارج خانة الكتابة) يبدل بينهما.
+      </ul>
+      <p>ولمستخدمي الفأرة وشاشة اللمس:</p><ul>
+        <li>تحريك عجلة الفأرة ينتقل بالكلمة. وكذلك السحب على شاشة اللمس أفقيا.
+      </ul>
+      <p>عند التسميع بالكتابة:</p><ul>
+        <li>اكتب الكلمة بالرسم الإملائي وبغير تشكيل، ثم اضغط مسافة.
+        <li>للمساعدة يمكن إظهار الكلمة قليلا بضغط زر <kbd>#</kbd> (العالي + ٣). يجب أن تكون الخانة فارغة لتظهر فيها المساعدة.
+        <li>لإضافة الحرف التالي من الكلمة، اضغط زر <kbd>!</kbd> (العالي + ١).
+      </ul>
+      <p>عند التسميع بالإظهار:</p><ul>
+        <li>ضغط زر المسافة (<kbd>&emsp;&emsp;&emsp;&emsp;&emsp;</kbd>) أو زر سهم يسار (<kbd>←</kbd>) يظهر الكلمة التالية.
+        <li>ضغط زر التراجع (<kbd>Backspace</kbd>) أو زر سهم يمين (<kbd>→</kbd>) يخفي الكلمة السابقة.
+        <li>ضغط زر سهم أسفل (<kbd>↓</kbd>) يظهر «العبارة» التالية، أي حتى موضع يجوز الوقوف عليه (عنده علامة وقف أو فراغ اختياري أو نهاية آية أو غير ذلك).
+        <li>ضغط زر سهم أعلى (<kbd>↑</kbd>) يخفي «العبارة» السابقة.
+      </ul>
+      <p>وفي كليهما:</p><ul>
+        <li>الزران اللذان بجوار <kbd>Backspace</kbd> (الشرطة والتساوي) ينتقلان بالكلمة، مهما كان تخطيط لوحة مفاتيحك.
+        <li>ضغط زر العالي (<kbd>Shift</kbd>) مع أي زر من أزرار الانتقال بالكلمة ينتقل بالعبارة.
+      </ul>
+      <p>وعند اختيار تلاوة صوتية:</p><ul>
+        <li>ضغط زر التحكم (<kbd>Ctrl</kbd>) مع المسافة (<kbd>&emsp;&emsp;&emsp;&emsp;&emsp;</kbd>) يشغّل أو يوقف التلاوة الصوتية الحالية.
+        <li>ضغط زر التحكم (<kbd>Ctrl</kbd>) مع زر سهم يسار (<kbd>←</kbd>) يحرّك التلاوة الصوتية ثانيتين للخلف.
+        <li>ضغط زر التحكم (<kbd>Ctrl</kbd>) مع زر سهم يمين (<kbd>→</kbd>) يحرّك التلاوة الصوتية ثانيتين للأمام.
+        <li>الضغط على أي كلمة في آية يشغل تلاوتها الصوتية (إلا في وضع الكتابة).
+      </ul>
+    </details>
+    <details><summary>شرح الانتقال بالصفحات بلوحة المفاتيح:</summary>
+      <ul>
+        <li>«الشاشة» هي صفحتان متقابلتان للشاشات العريضة، وصفحة واحدة لغيرها.
+        <li>ضغط <kbd>PageDown</kbd> ينتقل شاشة كاملة إلى الأمام، ويظهر الصفحات فارغة.
+        <li>ضغط <kbd>PageUp</kbd> ينتقل شاشة كاملة إلى الخلف، ويظهر الصفحات فارغة.
+        <li>ضغط <kbd>Shift</kbd> مع <kbd>PageDown</kbd> ينتقل شاشة كاملة إلى الأمام، ويظهر الصفحات كاملة.
+        <li>ضغط <kbd>Shift</kbd> مع <kbd>PageUp</kbd> ينتقل شاشة كاملة إلى الخلف، ويظهر الصفحات كاملة.
+        <li>ضغط <kbd>Ctrl</kbd> مع <kbd>Home</kbd> يخفي كلمات الصفحة الحالية. (وكذلك <kbd>Home</kbd> وحده عند التسميع بالإظهار.)
+        <li>ضغط <kbd>Ctrl</kbd> مع <kbd>End</kbd> يظهر الصفحة الحالية كاملة. (وكذلك <kbd>End</kbd> وحده عند التسميع بالإظهار.)
+      </ul>
+    </details>
+    <details class="wk"><summary>تفضيلات العرض:</summary>
+      <ul id="o">
+        <li><label>طول الصفحات:&thinsp;<select id="f">
+          <option value="" selected>حسب عرض النافذة</option>
+          <option value="y">احتواء الصفحات بلا تمرير</option>
+          <option value="n" >ملء العرض وتمرير الطول</option>
+        </select></label></li>
+        <li><label>عرض الصفحات:&thinsp;<select id="d">
+          <option value="" selected>حسب عرض النافذة</option>
+          <option value="y">صفحتان متقابلتان</option>
+          <option value="n" >صفحة واحدة</option>
+        </select></label></li>
+      </ul>
+    </details>
+    <details class="wk"><summary>تفضيلات الفأرة وشاشة اللمس (إذا وُجدت):</summary>
+      <div class="t"><!-- table -->
+      <div id="ssw"><label for="s-w">حساسية عجلة&nbsp;الفأرة:&thinsp;</label><div><input type="range" id="s-w"></div></div>
+      <div id="sss"><label for="s-s">حساسية لمسة&nbsp;السحب:&thinsp;</label><div><input type="range" id="s-s"></div></div>
+      </div>
+    </details>
+    <details class="wk oskpref"><summary>تفضيلات مفاتيح الشاشة:</summary>
+      <div class="t"><!-- table -->
+        <div id="kkvis"><label for="k-v">إظهار مفاتيح الشاشة:&thinsp;</label><div class="chk"><input type="checkbox" id="k-v"></div></div>
+        <!-- <div id="kkopc"><label for="k-o">تبيين المفاتيح باللمس:&thinsp;</label><div class="chk"><input type="checkbox" id="k-o"><span>&ensp;(أي باللمس قريبًا منها)</span></div></div> -->
+        <div id="kkful"><label for="k-f">الانتقال بالصفحات كاملة:&thinsp;</label><div class="chk"><input type="checkbox" id="k-f"></div></div>
+        <div id="kkrev"><label for="k-r">عكس اللوحتين أفقيا:&thinsp;</label><div class="chk"><input type="checkbox" id="k-r"></div></div>
+        <div id="kklay"><label for="k-l">توزيع الأزرار:&thinsp;</label><div><select id="k-l">
+          <option value="">حسب حجم النافذة</option>
+          <option value="G">في دائرة</option>
+          <option value="L">في عمود</option>
+          <!-- <option value="P">في مثلث</option> -->
+          <option value="S">في مربع</option>
+        </select></div></div>
+        <div id="kkfix"><label for="k-x">تثبيت موضع اللوحتين:&thinsp;</label><div><select id="k-x">
+          <option value="">حسب تفضيلات العرض وحجم النافذة</option>
+          <option value="s">تثبيت اللوحتين أسفل الشاشة</option>
+          <option value="f">جعل اللوحتين على جانبَي الشاشة</option>
+        </select></div></div>
+        <div id="kkpos"><label for="k-p">موضع اللوحتين رأسيا:&thinsp;</label><div><input type="range" id="k-p"></div></div>
+      </div>
+    </details>
+    <details id="v"><summary>هذه إصدارة يوم <<version>></summary><p>يجري تحميل سجل التغييرات…</p></details>
+    <p id="ft" class="nt">
+      <a href="https://github.com/noureddin/irsaa/">المصدر البرمجي والأصول</a> │
+      <a id=xyz>البريد الشابكي</a> │
+      جرب كذلك تطبيق <a href="https://www.noureddin.dev/recite/">رَسَيْتُ Recite</a> من المطور نفسه │
+      <a href="https://www.noureddin.dev/">تطبيقات أخرى</a> │
+      جرّب كذلك <a href="https://memorize.easyquran.com/">تطبيق التحفيظ من دار&nbsp;المعرفة</a>.
+    </p>
   </div>
-  <details id="q"><summary>تلاوة صوتية:</summary><p>يجري تحميل أسماء التلاوات الصوتية…</p>
-    <div class="t"><!-- table -->
-    <div><label for="qp">موضع المشغِّل:&thinsp;</label><div><select id="qp">
-      <option value="">متوسط في الأسفل</option>
-      <option value="t">متوسط في الأعلى</option>
-    </select></div></div>
-    <div><label for="qs">أسلوب الاستماع:&thinsp;</label><div><select id="qs">
-      <option value="a">بعد إتمام كل آية</option>
-      <option value="b">قبل بدء كل آية</option>
-      <option value="">عند النقر على الآية فقط</option>
-    </select></div></div>
-    </div>
-  </details>
-  <hr>
-  <details><summary>للتسميع أسلوبان: إظهار الكلمات بالأسهم، وبالكتابة.</summary>
-    <p>ويمكن التبديل بينهما وقتما شئت:</p><ul>
-      <li>زر الإدخال (<kbd>Enter</kbd>) في التسميع بالإظهار يجعل التسميع بالكتابة.
-      <li>زر الخروج (<kbd>Escape</kbd>) في التسميع بالكتابة يجعل التسميع بالإظهار.
-      <li>النقر المزدوج (خارج خانة الكتابة) يبدل بينهما.
-    </ul>
-    <p>ولمستخدمي الفأرة وشاشة اللمس:</p><ul>
-      <li>تحريك عجلة الفأرة ينتقل بالكلمة. وكذلك السحب على شاشة اللمس أفقيا.
-    </ul>
-    <p>عند التسميع بالكتابة:</p><ul>
-      <li>اكتب الكلمة بالرسم الإملائي وبغير تشكيل، ثم اضغط مسافة.
-      <li>للمساعدة يمكن إظهار الكلمة قليلا بضغط زر <kbd>#</kbd> (العالي + ٣). يجب أن تكون الخانة فارغة لتظهر فيها المساعدة.
-      <li>لإضافة الحرف التالي من الكلمة، اضغط زر <kbd>!</kbd> (العالي + ١).
-    </ul>
-    <p>عند التسميع بالإظهار:</p><ul>
-      <li>ضغط زر المسافة (<kbd>&emsp;&emsp;&emsp;&emsp;&emsp;</kbd>) أو زر سهم يسار (<kbd>←</kbd>) يظهر الكلمة التالية.
-      <li>ضغط زر التراجع (<kbd>Backspace</kbd>) أو زر سهم يمين (<kbd>→</kbd>) يخفي الكلمة السابقة.
-      <li>ضغط زر سهم أسفل (<kbd>↓</kbd>) يظهر «العبارة» التالية، أي حتى موضع يجوز الوقوف عليه (عنده علامة وقف أو فراغ اختياري أو نهاية آية أو غير ذلك).
-      <li>ضغط زر سهم أعلى (<kbd>↑</kbd>) يخفي «العبارة» السابقة.
-    </ul>
-    <p>وفي كليهما:</p><ul>
-      <li>الزران اللذان بجوار <kbd>Backspace</kbd> (الشرطة والتساوي) ينتقلان بالكلمة، مهما كان تخطيط لوحة مفاتيحك.
-      <li>ضغط زر العالي (<kbd>Shift</kbd>) مع أي زر من أزرار الانتقال بالكلمة ينتقل بالعبارة.
-    </ul>
-    <p>وعند اختيار تلاوة صوتية:</p><ul>
-      <li>ضغط زر التحكم (<kbd>Ctrl</kbd>) مع المسافة (<kbd>&emsp;&emsp;&emsp;&emsp;&emsp;</kbd>) يشغّل أو يوقف التلاوة الصوتية الحالية.
-      <li>ضغط زر التحكم (<kbd>Ctrl</kbd>) مع زر سهم يسار (<kbd>←</kbd>) يحرّك التلاوة الصوتية ثانيتين للخلف.
-      <li>ضغط زر التحكم (<kbd>Ctrl</kbd>) مع زر سهم يمين (<kbd>→</kbd>) يحرّك التلاوة الصوتية ثانيتين للأمام.
-      <li>الضغط على أي كلمة في آية يشغل تلاوتها الصوتية (إلا في وضع الكتابة).
-    </ul>
-  </details>
-  <details><summary>شرح الانتقال بالصفحات بلوحة المفاتيح:</summary>
-    <ul>
-      <li>«الشاشة» هي صفحتان متقابلتان للشاشات العريضة، وصفحة واحدة لغيرها.
-      <li>ضغط <kbd>PageDown</kbd> ينتقل شاشة كاملة إلى الأمام، ويظهر الصفحات فارغة.
-      <li>ضغط <kbd>PageUp</kbd> ينتقل شاشة كاملة إلى الخلف، ويظهر الصفحات فارغة.
-      <li>ضغط <kbd>Shift</kbd> مع <kbd>PageDown</kbd> ينتقل شاشة كاملة إلى الأمام، ويظهر الصفحات كاملة.
-      <li>ضغط <kbd>Shift</kbd> مع <kbd>PageUp</kbd> ينتقل شاشة كاملة إلى الخلف، ويظهر الصفحات كاملة.
-      <li>ضغط <kbd>Ctrl</kbd> مع <kbd>Home</kbd> يخفي كلمات الصفحة الحالية. (وكذلك <kbd>Home</kbd> وحده عند التسميع بالإظهار.)
-      <li>ضغط <kbd>Ctrl</kbd> مع <kbd>End</kbd> يظهر الصفحة الحالية كاملة. (وكذلك <kbd>End</kbd> وحده عند التسميع بالإظهار.)
-    </ul>
-  </details>
-  <details class="wk"><summary>تفضيلات العرض:</summary>
-    <ul id="o">
-      <li><label>طول الصفحات:&thinsp;<select id="f">
-        <option value="" selected>حسب عرض النافذة</option>
-        <option value="y">احتواء الصفحات بلا تمرير</option>
-        <option value="n" >ملء العرض وتمرير الطول</option>
-      </select></label></li>
-      <li><label>عرض الصفحات:&thinsp;<select id="d">
-        <option value="" selected>حسب عرض النافذة</option>
-        <option value="y">صفحتان متقابلتان</option>
-        <option value="n" >صفحة واحدة</option>
-      </select></label></li>
-    </ul>
-  </details>
-  <details class="wk"><summary>تفضيلات الفأرة وشاشة اللمس (إذا وُجدت):</summary>
-    <div class="t"><!-- table -->
-    <div id="ssw"><label for="s-w">حساسية عجلة&nbsp;الفأرة:&thinsp;</label><div><input type="range" id="s-w"></div></div>
-    <div id="sss"><label for="s-s">حساسية لمسة&nbsp;السحب:&thinsp;</label><div><input type="range" id="s-s"></div></div>
-    </div>
-  </details>
-  <details class="wk oskpref"><summary>تفضيلات مفاتيح الشاشة:</summary>
-    <div class="t"><!-- table -->
-      <div id="kkvis"><label for="k-v">إظهار مفاتيح الشاشة:&thinsp;</label><div class="chk"><input type="checkbox" id="k-v"></div></div>
-      <!-- <div id="kkopc"><label for="k-o">تبيين المفاتيح باللمس:&thinsp;</label><div class="chk"><input type="checkbox" id="k-o"><span>&ensp;(أي باللمس قريبًا منها)</span></div></div> -->
-      <div id="kkful"><label for="k-f">الانتقال بالصفحات كاملة:&thinsp;</label><div class="chk"><input type="checkbox" id="k-f"></div></div>
-      <div id="kkrev"><label for="k-r">عكس اللوحتين أفقيا:&thinsp;</label><div class="chk"><input type="checkbox" id="k-r"></div></div>
-      <div id="kklay"><label for="k-l">توزيع الأزرار:&thinsp;</label><div><select id="k-l">
-        <option value="">حسب حجم النافذة</option>
-        <option value="G">في دائرة</option>
-        <option value="L">في عمود</option>
-        <!-- <option value="P">في مثلث</option> -->
-        <option value="S">في مربع</option>
-      </select></div></div>
-      <div id="kkfix"><label for="k-x">تثبيت موضع اللوحتين:&thinsp;</label><div><select id="k-x">
-        <option value="">حسب تفضيلات العرض وحجم النافذة</option>
-        <option value="s">تثبيت اللوحتين أسفل الشاشة</option>
-        <option value="f">جعل اللوحتين على جانبَي الشاشة</option>
-      </select></div></div>
-      <div id="kkpos"><label for="k-p">موضع اللوحتين رأسيا:&thinsp;</label><div><input type="range" id="k-p"></div></div>
-    </div>
-  </details>
-  <details id="v"><summary>هذه إصدارة يوم <<version>></summary><p>يجري تحميل سجل التغييرات…</p></details>
-  <p id="ft" class="nt">
-    <a href="https://github.com/noureddin/irsaa/">المصدر البرمجي والأصول</a> │
-    <a id=xyz>البريد الشابكي</a> │
-    جرب كذلك تطبيق <a href="https://www.noureddin.dev/recite/">رَسَيْتُ Recite</a> من المطور نفسه │
-    <a href="https://www.noureddin.dev/">تطبيقات أخرى</a> │
-    جرّب كذلك <a href="https://memorize.easyquran.com/">تطبيق التحفيظ من دار&nbsp;المعرفة</a>.
-  </p>
-</div>
 </div>
 <audio id="player" controls preload></audio>
 <audio id="preloader" muted preload></audio>

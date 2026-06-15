@@ -39,7 +39,8 @@
 
 /* body.k is when darkmode is enabled */
 /* body.d is when showing double-page (ie, two facing pages at the same time) */
-/* body.h is when showing help */
+/* body.u is when showing help or another popup */
+/* body.u.h is when showing help */
 
 body {
   background: #FFFDD8;  /* same as margin color */
@@ -57,7 +58,7 @@ body>.scr { background: inherit }  /* to be grayscaled when showing help */
 
 body.nocursor #canvas { cursor: none }  /* hide when using the keyboard */
 
-#n, #h {
+#n, #u {
   margin: 1vh auto;
   position: relative;
 }
@@ -86,21 +87,21 @@ body.k #t:focus {
   box-shadow: inset 0.1em 0.1em 0.2em #8608;
 }
 
-.go, #h select {
+.go, #u select {
   border: 0.075em solid #888;
   border-radius: 0.15em;
 }
 
-#h *:focus { outline: 0.075em solid darkorange }
-body.k #h *:focus { outline: 0.075em solid #05c }  /* orange inverted and darkened slightly, for select/button */
-body.k #h summary:focus { outline: 0.075em solid orange }
+#u *:focus { outline: 0.075em solid darkorange }
+body.k #u *:focus { outline: 0.075em solid #05c }  /* orange inverted and darkened slightly, for select/button */
+body.k #u summary:focus { outline: 0.075em solid orange }
 
-#h a:focus {
+#u a:focus {
   opacity: 1;
   border-radius: 0.12em;
   outline: 0.15em dotted darkorange;
 }
-body.k #h a:focus { outline: 0.15em dotted orange }
+body.k #u a:focus { outline: 0.15em dotted orange }
 
 #t:disabled { display: none } /* when loading a page OR when help is shown while in insert mode (F1) */
 
@@ -325,11 +326,14 @@ body.d .sh { --f: 0.9em }
 
 button:disabled { cursor: not-allowed }
 
-body.h #t:disabled,
-body.h>.scr { filter: blur(0.5vmin) grayscale(1) brightness(0.6) }
-body.h #b,
-body.h #h  { display: block }
-body.h #sh { opacity: 0 !important }
+body.u #t:disabled,
+body.u>.scr { filter: blur(0.5vmin) grayscale(1) brightness(0.6) }
+body.u #b,
+body.u #u  { display: block }
+body.u #sh { opacity: 0 !important }
+
+#u>.scr { display: none }
+body.h #h { display: block }
 
 hr {
   border: none;
@@ -339,7 +343,7 @@ hr {
 
 #b { display: none; position: absolute; top: 0; right: 0; width: 100%; height: 100%; cursor: pointer }
 
-#h {
+#u {
   display: none;
   position: absolute;
   box-sizing: border-box;
@@ -353,10 +357,10 @@ hr {
     inset  0.03em  0.03em 0.15em white,
     inset -0.03em -0.03em 0.15em black;
 }
-body.k #h { background: #4458 }
-/* todo: Dark #h has bad colors */
+body.k #u { background: #4458 }
+/* todo: Dark #u has bad colors */
 
-#h > .scr {
+#h {
   width: 100%; height: 100%;
   box-sizing: border-box;
   padding: 0.5em;
@@ -403,7 +407,7 @@ h1 {
   font-weight: bold;
 }
 
-#h > .scr > p { margin-right: 0.5rem }
+#h > p { margin-right: 0.5rem }
 
 .i > span { display: none }
 .i {
@@ -621,7 +625,7 @@ body.k { scrollbar-color: #fff8 #fff2; --s: #f905 }
 
 /* body { --scroll-rgb: 0, 0, 0; } */
 /* body.k { --scroll-rgb: 255, 255, 255; } */
-/* /1* #h { scrollbar-color: rebeccapurple green } *1/ */
+/* /1* #u { scrollbar-color: rebeccapurple green } *1/ */
 /* /1* https://css-tricks.com/custom-scrollbars-in-webkit/ *1/ */
 /* ::-webkit-scrollbar { width: 0.5em } */
 /* ::-webkit-scrollbar-track { -webkit-box-shadow: inset 0 0 0.25em rgba(var(--scroll-rgb),0.3) } */
