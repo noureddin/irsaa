@@ -17,7 +17,7 @@ const correct_word = () => __correct_text[w]
 // screen & mode & colors
 let insert
 let helping = false
-let loading = false  // is the current pages still loading, thus don't accept input?
+let loading = true  // are the current pages still loading, thus don't accept input?
 
 // pending events (to delay certain actions so that a specific thing happens first)
 let audiopending = false  // if the page the loaded and the audio is ready to play, wait for the help window to be closed

@@ -542,6 +542,7 @@ const help_onresize = () => {
   help.style.right = (viewportWidth - helpwidth) / 2 + 'px'
   // that can be done in CSS only, but min() is still relatively new (Baseline Jul 2020).
 }
+help_onresize()
 
 // the container (the muṣħaf pages)'s width <= the screen's width.
 // the container's height can be < or == or > the screen's height.

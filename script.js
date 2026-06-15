@@ -121,9 +121,12 @@ const hide_help = (focus=true) => {
     kk.style.visibility = 'visible'
     txt.disabled = false
     if (focus) { focus_word() }
+    if (audio.can()) { audio.show() }
+    if (audiopending) { audiopending = false; play_or_preload_this() }
   }
-  if (audio.can()) { audio.show() }
-  if (audiopending) { audiopending = false; play_or_preload_this() }
+  else {
+    kk.style.visibility = 'hidden'
+  }
 }
 
 const disable_input = () => {  // disable in-page input during page loading
@@ -139,6 +142,8 @@ const enable_input = () => {
     kk.style.visibility = 'visible'
     txt.disabled = false
     focus_word()
+    if (audio.can()) { audio.show() }
+    if (audiopending) { audiopending = false; play_or_preload_this() }  // if hid the help while the page is still loading
   }
   loading = false
 }
@@ -189,7 +194,7 @@ const canvas_mouse_to_x_y_p = (ev) => {
 // }, { passive: true })
 
 canvas.addEventListener('click', (ev) => {
-  if (insert || !audio.can()) { return }
+  if (loading || insert || !audio.can()) { return }
   const [x, y, pp] = canvas_mouse_to_x_y_p(ev)
   // dbg_vline(x + (screen_double && pp % 2)*W)
   // dbg_hline(y)
