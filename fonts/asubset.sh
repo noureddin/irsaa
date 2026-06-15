@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# install the needed tools:
+# $ pip3 install fontTools zopfli
+
+# you also need: wget and unzip
+
 if [ "$(basename "$(pwd)")" != fonts ]; then
   >&2 printf 'Error: You are not in the fonts/ directory.\n'
   exit 2
