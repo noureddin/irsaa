@@ -32,7 +32,7 @@ document.onvisibilitychange = () => {
   store_num('l', line_select.value)
   store_if_notdefault('q', audio.getqari(), "")
   store_if_notdefault('qp', qp.value, "")
-  store_if_notdefault('qs', qs.value, "")
+  store_if_notdefault('qs', qs.value, 'a')
   store_num('_w', wheel.value)
   store_num('_s', swipe.value)
   store_folds()
@@ -57,7 +57,7 @@ draw_emptypage(emptypage.dataloading)
 data_loaded.then(() => {
 
   body.addEventListener('mouseup', (ev) => {
-    if (!loading && !helping) { focus_word() }
+    if (!loading && !helping && body.classList.contains('F')) { focus_word() }
   })
 
   onresize()

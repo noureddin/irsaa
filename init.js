@@ -76,15 +76,15 @@ const screen_init = () => {
 
 
 ;(() => {  // audio options
-  const qq = (el, want, store) => {
-    const v = want != null ? want : load_char(store, "")
+  const qq = (el, want, store, defaultvalue) => {
+    const v = want != null ? want : load_char(store, defaultvalue)
     // note: all qari url params take precedence over the stored previous preference,
     //   even if the value given in the url param is invalid. (see load.js for 'qari=')
     el.value = v
-    if (el.value !== v) { el.value = "" }
+    if (el.value !== v) { el.value = defaultvalue }
   }
-  qq(qp, wantqp, 'qp')
-  qq(qs, wantqs, 'qs')
+  qq(qp, wantqp, 'qp', "")
+  qq(qs, wantqs, 'qs', 'a')  // people will miss it when they choose a reciter
   qp.onchange = () => {
     player.classList.toggle('t', qp.value === 't')
   }
