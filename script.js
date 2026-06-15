@@ -405,7 +405,6 @@ const Movado = (() => {
       noredraw_screen = true  // don't change the global redraw_screen() again
       redraw_screen = Movado.redraw
       sync_selectors = true_sync_selectors
-      if (helpwait) { return }
       if (w > Q.words[p-1].length) { w = Q.words[p-1].length }
       go_to(p, w)
     },
@@ -502,11 +501,7 @@ meta_loaded.then(() => {
 
   sura_aaya_go.onclick = async () => {
     hide_help(false)  // don't focus input, because it'll be changed
-    if (!Q.suarayat || !Q.words) {
-      helpwait = true
-      await data_loaded
-      helpwait = false
-    }
+    await data_loaded
     // const aya = Q.sura_offset[+sura_select.value] + +aaya_select.value
     // const p = page_of(aya)
     let [p, w] = Q.suarayat[+sura_select.value][+aaya_select.value - 1]
@@ -516,11 +511,7 @@ meta_loaded.then(() => {
 
   page_line_go.onclick = async () => {
     hide_help(false)  // don't focus input, because it'll be changed
-    if (!Q.lineends && line_select.value !== "" && +line_select.value !== 1) {
-      helpwait = true
-      await data_loaded
-      helpwait = false
-    }
+    await data_loaded
     const p = +page_select.value
     const a = Q.page_offset[p-1]
     const w

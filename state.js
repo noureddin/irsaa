@@ -20,6 +20,5 @@ let helping = false
 let loading = false  // is the current pages still loading, thus don't accept input?
 
 // pending events (to delay certain actions so that a specific thing happens first)
-let helpwait = false
 let audiopending = false  // if the page the loaded and the audio is ready to play, wait for the help window to be closed
 
