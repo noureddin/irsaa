@@ -93,9 +93,7 @@ const screen_init = () => {
 })()
 
 for (let el of document.querySelectorAll('input[type="range"]')) {
-  el.parentElement.after(make_element('div', { className:'btn' }, [
-    make_element('button', { innerHTML: 'استرجاع' }),
-  ]))
+  el.after(make_element('button', { innerHTML: 'استرجاع' }))
 }
 
 // stats

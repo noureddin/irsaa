@@ -467,11 +467,11 @@ body.k details {
 
 .wk > div { margin-top: 1em; padding: 0.5em }
 /* .wk button { font-family: NotoSymbols, MyKacstOne, KacstOne, serif; font-size: 80%; width: 9em; height: 2em }  /1* sliders' reset buttons *1/ */
-.wk button { font-size: 80%; width: 4em; height: 2em }  /* sliders' reset buttons */
-.wk input[type="range"], .wk button { vertical-align: -0.5em }
-.wk input[type="range"] { width: 100% }
+/* .wk input[type="range"] { width: 100% } */
 .wk select { width: 100% }
 .t .chk { text-align: right; padding: 0 0.25em 0 0 }
+.wk button { font-size: 80%; width: 4em; height: 2em; margin-right: 0.5em }  /* sliders' reset buttons */
+.wk input[type="range"] { vertical-align: -0.5em }
 
 body.k details { background: #0001 }
 
@@ -495,7 +495,6 @@ summary + p, summary + ul { margin-top: 0.5rem }
 .t { display: table }
 .t > div { display: table-row }
 .t > div > * { display: table-cell; padding: 0 0.5em 1em 0 }
-.t .btn { padding: 0 1.5em 1em 0 }  /* the last table-cell of some rows */
 
 p + .t { margin-top: -0.5em }
 
@@ -523,29 +522,24 @@ select.go2 { width: 3em }
 
 /* support screens down to the width of 420px */
 
+:root { --M: 100% }  /* update in onresize() */
+.wk input[type="range"] { max-width: calc(var(--M) - var(--R) - 0.5em) }  /* that half is the button margin */
+.oskpref label + div { max-width: var(--M) }
+
 /* the goto table (.t.g) */
 
 @media (max-width: 469px) {
   .g.t { margin-right: -0.5em }
-  .g.t .btn { padding-right: 1em }
 }
 
 
 @media (max-width: 449px) {
   select.go2 { width: 2.6em }
-  .g.t .btn { padding-right: 0.5em }
   button.go { width: 3.6em }
-}
-
-/* the reset buttons */
-
-@media (max-width: 529px) {
-  .oskpref label + div { max-width: 8em }
 }
 
 @media (max-width: 469px) {
   .wk .t { margin-right: -0.5em }
-  .wk .t .btn { padding-right: 0.5em }
 }
 
 @media (max-width: 439px) {

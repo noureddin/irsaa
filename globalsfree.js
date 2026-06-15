@@ -111,6 +111,8 @@ const hash_set_pw = (p,w) => { history.replaceState(null, null, '#'+p+'/'+w) }
 
 const Qid = (id) => document.getElementById(id)
 
+const width_of = (sel) => parseFloat(getComputedStyle(document.querySelector(sel)).width)
+
 const make_element = (tag, opts, children) => {
   const el = document.createElement(tag)
   for (let k in opts) {
