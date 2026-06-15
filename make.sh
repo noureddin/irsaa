@@ -113,10 +113,27 @@ fi
 
 # HTML BASIC MINIFICATION, AND PROCESSING (embedding js & css)
 
-ver=`head -n1 changelog`
+verday=
+case $(date -d"$(sed '
+  s/.*(//; s/م)//; s| .*/||;
+  y/٠١٢٣٤٥٦٧٨٩/0123456789/;
+  s/يناير/Jan/;  s/فبراير/Feb/; s/مارس/Mar/;   s/إبريل/Apr/;
+  s/مايو/May/;   s/يونيو/Jun/;  s/يوليو/Jul/;  s/أغسطس/Aug/;
+  s/سبتمبر/Sep/; s/أكتوبر/Oct/; s/نوفمبر/Nov/; s/ديسمبر/Dec/;
+q' changelog)" +%w) in
+  0) verday=الأحد ;;
+  1) verday=الاثنين ;;
+  2) verday=الثلاثاء ;;
+  3) verday=الأربعاء ;;
+  4) verday=الخميس ;;
+  5) verday=الجمعة ;;
+  6) verday=السبت ;;
+  *) printf 'Error in date\n' >&2;;
+esac
+ver="$verday $(head -n1 changelog)"
 
 H() { perl -CSAD -Mutf8 -pE '
-  s/(<<version>><\/summary>)<p>.*?<\/p>/"$1\n".`cat "changelog.html"`/ge if "'${1:-}'" ne "";
+  s/(<<version>><\/summary>)<p>.*?<\/p>/"$1\n".`cat "changelog.html"`/ge if "'${1:-}'" ne "";  # for dist
   s/<!--.*?-->//g;
   s/^ *\n//g;
   if ("'$minify_html'" eq "true") {
