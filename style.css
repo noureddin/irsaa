@@ -425,6 +425,10 @@ h1 {
   font-size: 130%;
   font-weight: normal;
   margin: 0.7em 0.7em 0.2em;
+  color: #370;
+}
+body.k #v h2 {
+  color: #efc;
 }
 
 /* kbd's style in defined in HELP HEADER */
