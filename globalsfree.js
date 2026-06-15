@@ -491,8 +491,6 @@ const Pages = (() => {
 // DOM-manipulation {{{1
 // methods that manipulate certain document elements
 
-// Todo: check the UX when forcing both doublepage & scroll_y.
-
 const help_onresize = () => {
   const viewportWidth = window.innerWidth
   const helpwidth = Math.min(HELPMIN, 0.95*viewportWidth)
