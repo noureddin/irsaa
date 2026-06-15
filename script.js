@@ -65,7 +65,10 @@ txt.resize = () => {
   }
 }
 
-onresize = () => {
+onresize = (ev) => {
+  if (ev) { ++redrawing }  // don't announce redrawing when onresize is called directly
+  // redrawing is a count rather than a boolean, in cases where onresize calls are overlapping
+  //
   // a delay is needed sometimes to get the right dimensions
   requestAnimationFrame(() => {
     // a second delay is apparently needed for this
@@ -84,6 +87,7 @@ onresize = () => {
     update_fontsize()
     txt.resize()
     osk_onresize()
+    if (ev) { --redrawing }
   })
 }
 
@@ -257,6 +261,7 @@ const Movado = (() => {
   // all Movado methods call either update_page_to() or move() to change p&w
 
   const update_page_to = async (pp, ww) => {
+    const withaudio = !redrawing  // needed to be captured here, because we wait for update_page()
     pp = fixpage(pp)
     if (ww != null) {
       while (ww < Q.words[pp-1].length && is_void_word(pp, +ww)) { ++ww }
@@ -269,8 +274,10 @@ const Movado = (() => {
     w = ww
     hash_set_pw(p,w)
     // assert_pw()
-    if (helping) { audiopending = true }
-    else { play_or_preload_this() }
+    if (withaudio) {
+      if (helping) { audiopending = true }
+      else { play_or_preload_this() }
+    }
     return true
   }
 
@@ -645,13 +652,17 @@ const window_onkeydown = (ev) => {
   // Note: ev.code is for the physical key, thus ev.code === 'Minus' and ev.code === 'Equal'
   //   are for the two keys immediately to the left of Backspace; ie, Dvorak '[' and ']'.
   //
-  if (ev.altKey || ev.ctrlKey && ev.key !== 'Home' && ev.key !== 'End' && ev.key !== ' ') { return }
-  // ^ don't handle if alt or ctrl is pressed, unless it's ctrl with Home or End or Space
+  if (ev.altKey || ev.ctrlKey && ev.key !== 'Home' && ev.key !== 'End'
+      && ev.key !== ' ' && ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight'
+  ) { return }
+  // ^ don't handle if alt or ctrl is pressed, unless it's ctrl with these specific keys
   else if (ev.key === 'Escape') { ev.preventDefault(); on_escape() }
   else if (ev.key === 'F1')     { ev.preventDefault(); toggle_help() }
   else if (ev.key === 'F8')     { ev.preventDefault(); cycle_full_page() }
   else if (ev.key === '*')      { ev.preventDefault(); toggle_dark() }
-  else if (ev.ctrlKey && ev.key === ' ') { ev.preventDefault(); if (audio.can()) { player.play() } }
+  else if (ev.ctrlKey && ev.key === ' ') { ev.preventDefault(); audio.playpause() }
+  else if (ev.ctrlKey && ev.key === 'ArrowRight') { ev.preventDefault(); audio.seekforward() }
+  else if (ev.ctrlKey && ev.key === 'ArrowLeft')  { ev.preventDefault(); audio.seekbackward() }
   else if (ev.target.id === 'txt' || !txt.hidden && !txt.disabled) {
     if (loading || helping) { return }
     else if (ev.code === 'Equal') { ev.preventDefault(); Movado.backward(ev.shiftKey) }

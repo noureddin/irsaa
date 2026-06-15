@@ -146,6 +146,13 @@ const audio = (() => {
       audio.play(1, 1, 1)
       audio.preload(p, w+1)
     },
+    //
+    // hot keys:
+    playpause: () => { if (audio.can()) { player.paused ? player.play() : player.pause() } },
+    seekforward:  () => { if (audio.can() && player.src) { player.currentTime += 1 } },
+    seekbackward: () => { if (audio.can() && player.src) { player.currentTime -= 1 } },
+    // ^ seeking unconditionally like that is safe, because the time is clamped to [0,duration]
+    // see steps 6 & 7 in https://html.spec.whatwg.org/multipage/media.html#dom-media-seek
   }
 })()
 
