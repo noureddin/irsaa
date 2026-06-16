@@ -27,6 +27,10 @@
   <button id="x">X</button>
   <div id="hs"></div><!-- upper scroll-shadows -->
   <div id="ls"></div><!-- lower scroll-shadows -->
+  <div class="scr" id="c"><!-- scrollable area of the search -->
+    <div id="sxi"><select id="sura_sx"></select><input id="sxq"></div>
+    <div id="sxr"></div><!-- search results -->
+  </div>
   <div class="scr" id="h"><!-- scrollable area of help and options -->
     <h1>إرساء <span class="i"><span>&mdash;</span></span> مصحف&nbsp;تفاعلي لاختبار&nbsp;الحفظ</h1>
     <p class="nt">أظهر هذه الشاشة في أي وقت بضغط <nobr>زر <kbd>F1</kbd></nobr> في لوحة المفاتيح، أو <nobr>زر <span class="sh"><button disabled>؟</button><span></span></span></nobr> الذي في أعلى الشاشة.</p>
@@ -43,6 +47,10 @@
       <td><label>صفحة:&thinsp;<select class="go1" id="p"></select></label></td>
       <td><label>سطر:&thinsp;<select class="go2" id="l"></select></label></td>
       <td class="btn"><button class="go">اذهب</button></td>
+    </tr>
+    <tr>
+      <td>أو:</td>
+      <td colspan="2"><button class="search"><span>🔍</span> ابحث عن آية بجزء منها</button></td>
     </tr>
     </table>
     <details id="q"><summary>تلاوة صوتية:</summary><p>يجري تحميل أسماء التلاوات الصوتية…</p>

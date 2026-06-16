@@ -29,7 +29,7 @@ __sub() {
 }
 
 __sub NotoSansSymbols  Bold     ← ↑ → ↓
-__sub NotoSansSymbols2 Regular  ⏭  ⏮  🗘  ✍  ⮌
+__sub NotoSansSymbols2 Regular  ⏭  ⏮  🗘  ✍  ⮌  🔍
 
 ############################################################
 

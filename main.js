@@ -139,6 +139,10 @@ data_loaded.then(() => {
     // Todo: should, on touchscreen devices, be an option to always hide the mouse pointer?
   }
 
+  // show_popup('c')
+  // el_sxq.value = 'بسم'
+  // el_sxq.oninput()
+
 })
 .catch(() => {  // if failed to load the json data
   onresize()

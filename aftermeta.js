@@ -76,6 +76,37 @@ const normal_scroll = (p, w) => {  // normal-mode scroll-into-view
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// ayat utils {{{1
+// p+w / pag+eline / sura+aaya / aaya_offset conversions
+// see the "selectors" section in script.js
+
+// naming convention:
+// - p = page (1-based)
+// - w = word in page (0-based)
+// - l = line in page (1-based)
+// - s = sura number (1-based)
+// - a = aaya number in sura (1-based)
+// - y = aaya offset in the entire Quran (always 0-based (0 ≤ y < 6236) except when calling sura_of/page_of it's 1-based (0 < y ≤ 6236))
+// only w is always 0-based, and y usually is.
+
+const sura_of = (a) => bisect(Q.sura_offset, a, 114)    // takes 1-based aaya ∈ [1-6236], returns its 1-based sura number
+const page_of = (a) => bisect(Q.page_offset, a, 604)+1  // takes 1-based aaya ∈ [1-6236], returns its 1-based page number
+
+const page_word_to_sura_aaya = (p, w) => {
+  if (p === 187 && w <= 1) { return [9,1] }  // At-Tawba - the only sura not starting with a basmala
+  if (Q.basmalaat[p-1].includes(w) || Q.headers[p-1].includes(w)) { return [1,1] }  // the basmala, for audio
+  const y = Q.page_offset[p-1] + bisect(Q.ayat[p-1], w)
+  const s = sura_of(y+1)  // 1-based sura
+  const a = y - Q.sura_offset[s-1] + 1
+  return [s, a]
+}
+
+const sura_aaya_from_aaya_offset = (y) => {
+  const s = sura_of(y+1)  // 1-based sura
+  const a = y - Q.sura_offset[s-1]
+  return [s, a]
+}
+
 // word utils {{{1
 
 const is_void_word = (p, w) =>

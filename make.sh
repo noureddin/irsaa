@@ -169,7 +169,7 @@ needed() {
   return 1
 }
 
-jss='globalsfree.js init.js load.js aftermeta.js osk.js state.js audio.js script.js main.js'
+jss='globalsfree.js init.js load.js aftermeta.js search.js osk.js state.js audio.js script.js main.js'
 
 if needed .minified.script -- $jss .hashes_vars.sh; then
   printf 'Preparing %s... ' 'the script'
@@ -225,4 +225,14 @@ if $dist; then
   s|url\(icon/icon.svg\)|url(data:image/svg+xml;base64,$b{icon})|;
   s|\n\n+|\n|g;
 ' > irsaa.html
+fi
+
+if [ $# -gt 0 ] && [ "$1" = uthm ]; then
+  mkdir -p u
+  last=1; i=1
+  for this in 493 954 1473 2140 2932 3788 4735 6236 ; do
+    sed -n "$last,$ p; $this q" ../recite/res/u | tr -d 'A-Z<>#' | zstd -19 > u/$i.zst
+    last=$((this+1))
+    i=$((i+1))
+  done
 fi

@@ -8,6 +8,14 @@
        url('fonts/Amiri-.woff')  format('woff');
 }
 
+/* Amiri Quran 0.112, SIL OFL 1.1; https://github.com/alif-type/amiri */
+@font-face {
+  font-family: AmiriQuran; font-style: normal; font-weight: 400; font-display: swap;
+  src: local('Amiri Quran'),  /* if found locally, use it, otherwise use another local font, until this loads. */
+       url('fonts/AmiriQuran.woff2') format('woff2'),
+       url('fonts/AmiriQuran.woff')  format('woff');
+}
+
 /* Noto Kufi Arabic; subsetted; see fonts/bsubset.sh for downloading the original and subsetting */
 @font-face {
   font-family: "Noto Kufi Arabic"; font-style: normal; font-weight: 700; font-display: swap;
@@ -67,9 +75,11 @@ body.nocursor #canvas { cursor: none }  /* hide when using the keyboard */
 
 /** INSERT {{{1 **/
 
+input {
+  font-family: Amiri, MyKacstOne, KacstOne, serif;
+}
 #t {
   color: inherit;
-  font-family: Amiri, MyKacstOne, KacstOne, serif;
   position: absolute;
   background: none;
   box-sizing: border-box;
@@ -334,6 +344,7 @@ body.u #sh { opacity: 0 !important }
 
 #u>.scr { display: none }
 body.h #h { display: block }
+body.c #c { display: block }
 
 hr {
   border: none;
@@ -380,6 +391,8 @@ td select { width: 100% }
 .g td { padding-right: var(--p) }
 .g td:first-child { padding-right: 0 }
 .g td:last-child { padding-right: calc(2*var(--p)) }
+
+.g td[colspan] { text-align: center; padding-right: 0 }
 
 @media (max-width: 439px) { .g { --p: 0.25em } }
 @media (max-width: 419px) { .g { --p: 0; margin-right: -0.5em } }
@@ -567,6 +580,97 @@ body.k a:hover, body.k a:focus {
 /* body.k a:last-child, */
 body.k a:active { color: #e80 }
 
+/** SEARCH {{{1 **/
+
+.g .search { width: initial; padding: 0 1em }  /* the button in help */
+.g .search span { font-family: NotoSymbols; vertical-align: -0.15em }  /* the magnifying glass */
+
+body.k #sxq {
+  color: white;
+  background: #000;
+  border-radius: 0.1em;
+}
+
+#sxq { font-size: 1em }
+
+#spin ~ * { opacity: 0.5 }
+
+:root {
+  --sxsa: hsla(30deg, 80%, 60%, 0.6);
+  --sxr:  hsl(80deg, 30%, 70%);  /* each aya search results */
+  --sxrh: brightness(1.075);  /* hover */
+  --sxra-shadow: 0 0 0.25rem black,
+    inset 0  0.5rem 1rem #fff,
+    inset 0 -0.5rem 1rem #0004;
+}
+
+body.k {
+  --sxsa: #8308;
+  --sxr:  #130;  /* each aya search results */
+  --sxrh: brightness(1.25);  /* hover */
+  --sxra-shadow: 0 0 0.2rem white,
+      inset 0  0.5rem 1rem #fff4,
+      inset 0 -0.5rem 1rem #000f;
+}
+
+#c { padding: 0.5em; box-sizing: border-box }
+body.c #x { top: 4.5em }
+
+#c .aya { font-family: AmiriQuran }
+
+/* #sxi { width: var(--all-width) } */
+/* #c input { min-width: 8em } */
+
+#sura_sx {
+  margin-left: 0.5em;
+  width: 6em;
+}
+
+#sxi { display: flex; flex: row }
+#c input { flex-grow: 100 /* all the space it can have */ }
+
+#c center { margin: 2em  0 }  /* messages, not search results */
+#c svg + center { margin-top: 0 }  /* if waiting after user input */
+
+#sxr .ac {
+  text-align: right;
+  background: var(--sxr);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  overflow: hidden;  /* hide the excess part of .s_a */
+  position: relative;
+  transition: 0.25s filter;
+}
+#sxr .ac:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  margin: -1rem 0;  /* to counter the padding of the parent */
+  box-shadow: var(--sxra-shadow);
+}
+
+#sxr .ac:hover, #sxr .ac:active {
+  filter: var(--sxrh);
+}
+
+.s_a {  /* sura-aaya title in #sxr */
+  background: var(--sxsa);
+  border-radius: 0 1rem 0 1rem;
+  padding: 3rem 1rem 0.5rem 0.75rem;
+  margin: 0 -1rem 0 1rem;
+}
+
+#sxr .aya {
+  line-height: 2.75;
+}
+
+#sxr:hover, #sxr:focus {
+  cursor: pointer;
+}
 
 /** SCROLL {{{1 **/
 

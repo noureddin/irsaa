@@ -49,6 +49,9 @@ const TxtBgWrong  = ['#fbb8',   '#6008']
 const TxtBgDone   = ['#3d38',   '#0807']  // needed only for bang-cheating
 const TxtFg       = ['#111',    '#eee']
 
+// popup classes as a string - each letter is a className
+const popcls = 'hc'
+
 ////////////////////////////////////////////////////////////////////////////////
 // client & connection constants {{{1
 
@@ -164,9 +167,11 @@ const double_select = Qid('d')
 const fitscreen_select = Qid('f')
 const upper_scrollshadow = Qid('hs')
 const lower_scrollshadow = Qid('ls')
-const helpscroll = Qid('h')
 const pagescroll = document.querySelector('body>.scr')
 const [sura_aaya_go, page_line_go] = document.querySelectorAll('button.go')
+
+// popup
+const popup_focus_element = { 'h':document.querySelector('select') }
 
 // others
 // the min width & height at which we choose double-page & fit-screen if no pref
@@ -604,7 +609,8 @@ const select_fit = (fit, double) => {
 
 const update_scrollshadows = () => {
   const scrollarea
-    = body.classList.contains('h') ? helpscroll
+    = body.classList.contains('h') ? Qid('h')
+    : body.classList.contains('c') ? Qid('c')
     : null
   if (!scrollarea) { return }
   upper_scrollshadow.style.opacity =

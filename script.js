@@ -78,7 +78,8 @@ onresize = (ev) => {
     body.style.setProperty('--M', '100%')
     requestAnimationFrame(() => {
       body.style.setProperty('--R', width_of('.oskpref button') + 'px')
-      body.style.setProperty('--M', (width_of('.oskpref') - width_of('.oskpref td:first-child') - REM) + 'px')
+      const m = width_of('.oskpref') - width_of('.oskpref label') - REM
+      if (!isNaN(m)) { body.style.setProperty('--M', m + 'px') }
     })
     //
     resize_canvas()
@@ -116,17 +117,18 @@ const to_insert = () => {
 const show_popup = (cls) => {
   has_popup = true
   if (cls === 'h') { sync_selectors(p, w) }
+  body.classList.remove(...popcls.replace(cls, ""))
   body.classList.add('u', cls)
   update_scrollshadows()
   txt.disabled = true
   kk.style.visibility = 'hidden'
-  if (cls === 'h') { document.querySelector('select').focus() }
+  popup_focus_element[cls].focus()
   if (player.paused) { audio.hide() }
 }
 
 const hide_popup = (focus=true) => {
   has_popup = false
-  body.classList.remove('u', 'h', 'c')
+  body.classList.remove('u', ...popcls)
   if (!loading) {
     kk.style.visibility = 'visible'
     txt.disabled = false
@@ -432,17 +434,12 @@ const Movado = (() => {
 ////////////////////////////////////////////////////////////////////////////////
 // selectors {{{1
 
-let page_word_to_sura_aaya
-
 meta_loaded.then(() => {
 
   draw_emptypage(emptypage.pageloading)
 
   const start_ = (s) => +Q.sura_length.slice(0, s).reduce((a, b) => a + b, 0)
   Q.sura_offset = range(115).map(start_)  // array mapping 0-based suar to how many ayat before it (eg 0 => 0, 1 => 7, 2 => 286+7)
-
-  const sura_of = (a) => bisect(Q.sura_offset, a, 114)  // takes 1-based aaya ∈ [1-6236], returns its 1-based sura number
-  const page_of = (a) => bisect(Q.page_offset, a, 604)  // takes 1-based aaya ∈ [1-6236], returns its 0-based page number
 
   const sync_page_line = () => {  // with sura-aaya
     if (Q.suarayat && Q.words) {  // if loaded
@@ -453,28 +450,17 @@ meta_loaded.then(() => {
       line_select.value = 1 + bisect(Q.lineends[p-1], w)
     }
     else {
-      page_select.value = page_of( Q.sura_offset[+sura_select.value] + +aaya_select.value )
+      page_select.value = page_of( Q.sura_offset[+sura_select.value] + +aaya_select.value ) - 1
       update_lines()
       line_select.value = 1  // TODO
     }
   }
 
-  page_word_to_sura_aaya = (p, w) => {
-    if (p === 187 && w <= 1) { return [9,1] }  // At-Tawba - the only sura not starting with a basmala
-    if (Q.basmalaat[p-1].includes(w) || Q.headers[p-1].includes(w)) { return [1,1] }  // the basmala, for audio
-    const y = Q.page_offset[p-1] + bisect(Q.ayat[p-1], w)
-    const s = sura_of(y + 1)  // 1-based sura
-    const a = y - Q.sura_offset[s-1] + 1
-    return [s, a]
-  }
-
   const update_sura_aaya_from_aaya_offset = (y) => {
-    const s = sura_of(y + 1)  // 1-based sura
+    const [s, a] = sura_aaya_from_aaya_offset(y)  // s & a are 1-based
     sura_select.value = s - 1
     update_aayat()
-    const a = y - Q.sura_offset[s-1]
-    aaya_select.value = a + 1
-    // aaya_select.value = Math.min(Q.sura_length[s-1], a + 1)
+    aaya_select.value = a
   }
 
   const page_word_offset_to_sura_aaya = (p, w) => {
@@ -644,9 +630,11 @@ const on_escape = () => {
     show_popup('h')
 }
 
-const showing_help = () => body.classList.contains('h')
+const showing_help   = () => body.classList.contains('h')
+const showing_search = () => body.classList.contains('c')
 
-const toggle_help = () => showing_help() ? hide_popup() : show_popup('h')
+const toggle_help   = () => showing_help()   ? hide_popup() : show_popup('h')
+const toggle_search = () => showing_search() ? hide_popup() : show_popup('c')
 
 const window_onkeyup = Movado.keyup
 
@@ -663,6 +651,7 @@ const window_onkeydown = (ev) => {
   else if (ev.key === 'F1')     { ev.preventDefault(); toggle_help() }
   else if (ev.key === 'F8')     { ev.preventDefault(); cycle_full_page() }
   else if (ev.key === '*')      { ev.preventDefault(); toggle_dark() }
+  else if (ev.key === 'F2')     { ev.preventDefault(); toggle_search() }
   else if (ev.ctrlKey && ev.key === ' ') { ev.preventDefault(); audio.playpause() }
   else if (ev.ctrlKey && ev.key === 'ArrowRight') { ev.preventDefault(); audio.seekforward() }
   else if (ev.ctrlKey && ev.key === 'ArrowLeft')  { ev.preventDefault(); audio.seekbackward() }

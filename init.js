@@ -74,6 +74,7 @@ const screen_init = () => {
 ////////////////////////////////////////////////////////////////////////////////
 // DOM constant (never-changing) initializations (event handlers etc) {{{1
 
+document.querySelector('.search').onclick = () => show_popup('c')
 
 ;(() => {  // audio options
   const qq = (el, want, store, defaultvalue) => {
