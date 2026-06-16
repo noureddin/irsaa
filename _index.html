@@ -30,32 +30,33 @@
   <div class="scr" id="h"><!-- scrollable area of help and options -->
     <h1>إرساء <span class="i"><span>&mdash;</span></span> مصحف&nbsp;تفاعلي لاختبار&nbsp;الحفظ</h1>
     <p class="nt">أظهر هذه الشاشة في أي وقت بضغط <nobr>زر <kbd>F1</kbd></nobr> أو <nobr>زر <kbd>Tab</kbd></nobr> في لوحة المفاتيح، أو <nobr>زر <span class="sh"><button disabled>؟</button><span></span></span></nobr> الذي في أعلى الشاشة.</p>
-    <div class="t g"><!-- table -->
-      <div>
-        <div>انتقل إلى:</div>
-        <label>سورة:&thinsp;<select class="go1" id="s"></select></label>
-        <label>آية:&thinsp;<select class="go2" id="a"></select></label>
-        <div class="btn"><button class="go">اذهب</button></div>
-      </div>
-      <div>
-        <div>أو:</div>
-        <label>صفحة:&thinsp;<select class="go1" id="p"></select></label>
-        <label>سطر:&thinsp;<select class="go2" id="l"></select></label>
-        <div class="btn"><button class="go">اذهب</button></div>
-      </div>
-    </div>
+    <!-- display:table doesn't support colspan, and role="presentation" avoids <table> accessibility issues -->
+    <table role="presentation" class="g">
+    <tr>
+      <td>انتقل إلى:</td>
+      <td><label>سورة:&thinsp;<select class="go1" id="s"></select></label></td>
+      <td><label>آية:&thinsp;<select class="go2" id="a"></select></label></td>
+      <td class="btn"><button class="go">اذهب</button></td>
+    </tr>
+    <tr>
+      <td>أو:</td>
+      <td><label>صفحة:&thinsp;<select class="go1" id="p"></select></label></td>
+      <td><label>سطر:&thinsp;<select class="go2" id="l"></select></label></td>
+      <td class="btn"><button class="go">اذهب</button></td>
+    </tr>
+    </table>
     <details id="q"><summary>تلاوة صوتية:</summary><p>يجري تحميل أسماء التلاوات الصوتية…</p>
-      <div class="t"><!-- table -->
-      <div><label for="qp">موضع المشغِّل:&thinsp;</label><div><select id="qp">
+      <table role="presentation">
+      <tr><td><label for="qp">موضع المشغِّل:&thinsp;</label></td><td><select id="qp">
         <option value="">متوسط في الأسفل</option>
         <option value="t">متوسط في الأعلى</option>
-      </select></div></div>
-      <div><label for="qs">أسلوب الاستماع:&thinsp;</label><div><select id="qs">
+      </select></td></tr>
+      <tr><td><label for="qs">أسلوب الاستماع:&thinsp;</label></td><td><select id="qs">
         <option value="a">بعد إتمام كل آية</option>
         <option value="b">قبل بدء كل آية</option>
         <option value="">عند النقر على الآية فقط</option>
-      </select></div></div>
-      </div>
+      </select></td></tr>
+      </table>
     </details>
     <hr>
     <details><summary>للتسميع أسلوبان: إظهار الكلمات بالأسهم، وبالكتابة.</summary>
@@ -101,45 +102,45 @@
       </ul>
     </details>
     <details class="wk"><summary>تفضيلات العرض:</summary>
-      <ul id="o">
-        <li><label>طول الصفحات:&thinsp;<select id="f">
-          <option value="" selected>حسب عرض النافذة</option>
-          <option value="y">احتواء الصفحات بلا تمرير</option>
-          <option value="n" >ملء العرض وتمرير الطول</option>
-        </select></label></li>
-        <li><label>عرض الصفحات:&thinsp;<select id="d">
-          <option value="" selected>حسب عرض النافذة</option>
-          <option value="y">صفحتان متقابلتان</option>
-          <option value="n" >صفحة واحدة</option>
-        </select></label></li>
-      </ul>
+      <table role="presentation">
+      <tr><td><label for="f">طول الصفحات:&thinsp;</label></td><td><select id="f">
+        <option value="" selected>حسب عرض النافذة</option>
+        <option value="y">احتواء الصفحات بلا تمرير</option>
+        <option value="n" >ملء العرض وتمرير الطول</option>
+      </select></td></tr>
+      <tr><td><label for="d">عرض الصفحات:&thinsp;</label></td><td><select id="d">
+        <option value="" selected>حسب عرض النافذة</option>
+        <option value="y">صفحتان متقابلتان</option>
+        <option value="n" >صفحة واحدة</option>
+      </select></label></td></tr>
+      </table>
     </details>
     <details class="wk"><summary>تفضيلات الفأرة وشاشة اللمس (إذا وُجدت):</summary>
-      <div class="t"><!-- table -->
-      <div id="ssw"><label for="s-w">حساسية عجلة&nbsp;الفأرة:&thinsp;</label><div><input type="range" id="s-w"></div></div>
-      <div id="sss"><label for="s-s">حساسية لمسة&nbsp;السحب:&thinsp;</label><div><input type="range" id="s-s"></div></div>
-      </div>
+      <table role="presentation">
+      <tr id="ssw"><td><label for="s-w">حساسية عجلة&nbsp;الفأرة:&thinsp;</label></td><td><input type="range" id="s-w"></td></tr>
+      <tr id="sss"><td><label for="s-s">حساسية لمسة&nbsp;السحب:&thinsp;</label></td><td><input type="range" id="s-s"></td></tr>
+      </table>
     </details>
     <details class="wk oskpref"><summary>تفضيلات مفاتيح الشاشة:</summary>
-      <div class="t"><!-- table -->
-        <div id="kkvis"><label for="k-v">إظهار مفاتيح الشاشة:&thinsp;</label><div class="chk"><input type="checkbox" id="k-v"></div></div>
-        <!-- <div id="kkopc"><label for="k-o">تبيين المفاتيح باللمس:&thinsp;</label><div class="chk"><input type="checkbox" id="k-o"><span>&ensp;(أي باللمس قريبًا منها)</span></div></div> -->
-        <div id="kkful"><label for="k-f">الانتقال بالصفحات كاملة:&thinsp;</label><div class="chk"><input type="checkbox" id="k-f"></div></div>
-        <div id="kkrev"><label for="k-r">عكس اللوحتين أفقيا:&thinsp;</label><div class="chk"><input type="checkbox" id="k-r"></div></div>
-        <div id="kklay"><label for="k-l">توزيع الأزرار:&thinsp;</label><div><select id="k-l">
+      <table role="presentation">
+        <tr id="kkvis"><td><label for="k-v">إظهار مفاتيح الشاشة:&thinsp;</label></td><td class="chk"><input type="checkbox" id="k-v"></td></tr>
+        <tr id="kkopc"><td><label for="k-o">تبيين المفاتيح باللمس:&thinsp;</label></td><td class="chk"><input type="checkbox" id="k-o"><span>&ensp;(أي باللمس قريبًا منها)</span></td></tr>
+        <tr id="kkful"><td><label for="k-f">الانتقال بالصفحات كاملة:&thinsp;</label></td><td class="chk"><input type="checkbox" id="k-f"></td></tr>
+        <tr id="kkrev"><td><label for="k-r">عكس اللوحتين أفقيا:&thinsp;</label></td><td class="chk"><input type="checkbox" id="k-r"></td></tr>
+        <tr id="kklay"><td><label for="k-l">توزيع الأزرار:&thinsp;</label></td><td><select id="k-l">
           <option value="">حسب حجم النافذة</option>
           <option value="G">في دائرة</option>
           <option value="L">في عمود</option>
           <!-- <option value="P">في مثلث</option> -->
           <option value="S">في مربع</option>
-        </select></div></div>
-        <div id="kkfix"><label for="k-x">تثبيت موضع اللوحتين:&thinsp;</label><div><select id="k-x">
+        </select></td></tr>
+        <tr id="kkfix"><td><label for="k-x">تثبيت موضع اللوحتين:&thinsp;</label></td><td><select id="k-x">
           <option value="">حسب تفضيلات العرض وحجم النافذة</option>
           <option value="s">تثبيت اللوحتين أسفل الشاشة</option>
           <option value="f">جعل اللوحتين على جانبَي الشاشة</option>
-        </select></div></div>
-        <div id="kkpos"><label for="k-p">موضع اللوحتين رأسيا:&thinsp;</label><div><input type="range" id="k-p"></div></div>
-      </div>
+        </select></td></tr>
+        <tr id="kkpos"><td><label for="k-p">موضع اللوحتين رأسيا:&thinsp;</label></td><td><input type="range" id="k-p"></td></tr>
+      </table>
     </details>
     <details id="v"><summary>هذه إصدارة يوم <<version>></summary><p>يجري تحميل سجل التغييرات…</p></details>
     <p id="ft" class="nt">

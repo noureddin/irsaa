@@ -368,6 +368,34 @@ body.k #u { background: #4458 }
 /* see .ssh in the SCROLL section */
 
 
+/** OPTION TABLES {{{1 **/
+
+table { margin: 0.5em }
+td { text-align: left; white-space: nowrap; padding: 0.3em 0 }
+td select { width: 100% }
+
+#q table { margin-top: 0 }
+
+.g { --p: 0.5em }
+.g td { padding-right: var(--p) }
+.g td:first-child { padding-right: 0 }
+.g td:last-child { padding-right: calc(2*var(--p)) }
+
+@media (max-width: 439px) { .g { --p: 0.25em } }
+@media (max-width: 419px) { .g { --p: 0; margin-right: -0.5em } }
+
+
+:root { --M: 100% }  /* update in onresize() */
+.wk input[type="range"] {
+  vertical-align: -0.5em;
+  max-width: calc(var(--M) - var(--R) - 0.5em);  /* that half is the button margin */
+}
+.oskpref td:nth-child(2) { text-align: right; max-width: var(--M) }
+
+/* .wk button { font-family: NotoSymbols, MyKacstOne, KacstOne, serif; font-size: 80%; width: 9em; height: 2em }  /1* sliders' reset buttons *1/ */
+.wk button { font-size: 80%; width: 4em; height: 2em; margin-right: 0.5em }  /* sliders' reset buttons */
+
+
 /** HELP GOTO {{{1 **/
 
 h1 + p {
@@ -456,6 +484,8 @@ summary:hover              { box-shadow: var(--in), 0.06em  0.06em 0.30em #0008 
 details:open>summary       { box-shadow: var(--in), 0.06em  0.06em 0.30em #0006 }
 details:open>summary:hover { box-shadow: var(--in), 0.06em  0.06em 0.30em #000a }
 
+details:open { padding-bottom: 0.5em }
+
 details {
   margin: 1em 0;
   background: #fff6;
@@ -470,20 +500,7 @@ body.k details {
         inset 0      -0.20em 1.00em #fff4;
 }
 
-#q .t { margin: 0 1.2em 0 0 }
-#q .t select { width: 100% }
-
-.wk > div { margin-top: 1em; padding: 0.5em }
-/* .wk button { font-family: NotoSymbols, MyKacstOne, KacstOne, serif; font-size: 80%; width: 9em; height: 2em }  /1* sliders' reset buttons *1/ */
-/* .wk input[type="range"] { width: 100% } */
-.wk select { width: 100% }
-.t .chk { text-align: right; padding: 0 0.25em 0 0 }
-.wk button { font-size: 80%; width: 4em; height: 2em; margin-right: 0.5em }  /* sliders' reset buttons */
-.wk input[type="range"] { vertical-align: -0.5em }
-
 body.k details { background: #0001 }
-
-/* details + p, .t { margin-top: 2em } */
 
 details p, details ul, details li { margin: 0 1em 0 0 }
 details summary { margin: 0 }
@@ -500,14 +517,6 @@ summary + p, summary + ul { margin-top: 0.5rem }
 #qaris { margin: 1em; width: initial; max-width: calc(100% - 2em) }
 #q p { margin-bottom: 1em }
 
-.t { display: table }
-.t > div { display: table-row }
-.t > div > * { display: table-cell; padding: 0 0.5em 1em 0 }
-
-p + .t { margin-top: -0.5em }
-
-.t div { text-align: left }
-
 .g select, .g button { width: 4em; height: 2em }
 select, button { font-family: inherit; font-size: inherit; cursor: pointer; filter: invert(0.05) }
 
@@ -515,45 +524,7 @@ body.k select, body.k button { filter: invert(0.85) }
 select.go1 { width: 4.5em }
 select.go2 { width: 3em }
 
-#o select { width: var(--W) }
-#o > li {
-  list-style: none;
-  margin: 0.5em -2em 1em 0;
-  --W: 11em;
-  width: calc(var(--W) + 8em);
-  text-align: left;
-}
-
-.t * { white-space: nowrap }
-
 .chk span { opacity: 0.35  }
-
-/* support screens down to the width of 420px */
-
-:root { --M: 100% }  /* update in onresize() */
-.wk input[type="range"] { max-width: calc(var(--M) - var(--R) - 0.5em) }  /* that half is the button margin */
-.oskpref label + div { max-width: var(--M) }
-
-/* the goto table (.t.g) */
-
-@media (max-width: 469px) {
-  .g.t { margin-right: -0.5em }
-}
-
-
-@media (max-width: 449px) {
-  select.go2 { width: 2.6em }
-  button.go { width: 3.6em }
-}
-
-@media (max-width: 469px) {
-  .wk .t { margin-right: -0.5em }
-}
-
-@media (max-width: 439px) {
-  .wk .t { margin-right: -.9em; width: 100% }
-  .wk .t label + div { padding-right: 0 }
-}
 
 /** HELP FOOTER {{{1 **/
 

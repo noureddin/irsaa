@@ -78,7 +78,7 @@ onresize = (ev) => {
     body.style.setProperty('--M', '100%')
     requestAnimationFrame(() => {
       body.style.setProperty('--R', width_of('.oskpref button') + 'px')
-      body.style.setProperty('--M', (width_of('.oskpref') - width_of('.oskpref label') - 2*REM) + 'px')
+      body.style.setProperty('--M', (width_of('.oskpref') - width_of('.oskpref td:first-child') - REM) + 'px')
     })
     //
     resize_canvas()
