@@ -27,7 +27,7 @@ if [ $# -gt 0 ]; then
       _ rm -f .hashes_vars.sh mymeta.json.zst
     fi
     if [ -e irsaa.html ]; then
-      _ rm -f irsaa.html .minified2.{script,style} LOAD.js changelog.html
+      _ rm -f irsaa.html .minified2.{script,style} LOAD.js changelog.html qaris.html
     fi
     ;;
   esac
@@ -133,6 +133,7 @@ esac
 ver="$verday $(head -n1 changelog)"
 
 H() { perl -CSAD -Mutf8 -pE '
+  s/<p>يجري تحميل أسماء التلاوات الصوتية…<\/p>/`cat "qaris.html"`/ge if "'${1:-}'" ne "";  # for dist
   s/(<<version>><\/summary>)<p>.*?<\/p>/"$1\n".`cat "changelog.html"`/ge if "'${1:-}'" ne "";  # for dist
   s/<!--.*?-->//g;
   s/^ *\n//g;
@@ -199,13 +200,23 @@ if $dist; then
   #
   if ! [ -e changelog.html ] || [ changelog -nt changelog.html ]; then
     perl -CDAS -Mutf8 -lne '
-      s/&/&amp;/g; s/</&lt;/g; chomp;
+      s/&/&amp;/g; s/<(?= )/&lt;/g; chomp;
       print
         s/^- // ? " "x6 . "<li>$_</li>" :
         $_ eq "" ? " "x4 . "</ul>" :
           " "x4 . "<h2>$_</h2><ul>"
     ' changelog > changelog.html
     printf '%4s</ul>\n%2s' "" "" >> changelog.html
+  fi
+  #
+  if ! [ -e qaris.html ] || [ qaris.html -ot ../recite/res/qaris ]; then
+    { printf '    <select id="qaris" onchange="data_loaded.then(() => audio.setqari(this.value))">\n'
+      printf '      <option value="">بغير تلاوة صوتية</option>\n'
+      cat ../recite/res/qaris | while read id; do read name
+        printf '      <option value="%s">%s</option>\n' "$id" "$name"
+      done
+      printf '    </select>\n'
+    } > qaris.html
   fi
   #
   [ -e .minified2.style ] || ln .minified.style .minified2.style
@@ -216,6 +227,7 @@ if $dist; then
     $b{$_[0]} //= `base64 -w0 < "fonts/$_[0].woff2"`;
     s|src:[^;}]*?url\(\x27fonts/$_[0].woff2\x27\)[^;}]*|src:url(data:font/woff2;charset=utf-8;base64,$b{$_[0]}) format(\x27woff2\x27)|
   }
+  subfont "AmiriQuran";
   subfont "Amiri-";
   subfont "Noto Kufi-";
   subfont "KacstOne-";

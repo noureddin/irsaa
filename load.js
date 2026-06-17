@@ -2,33 +2,38 @@
 // global (set once) variables
 const Q = {}  // metadata & text
 
-const unzstd = (path, callback) => {  // zstd-compressed files
-  return fetch(path)
-    .then((res) => res.ok ? res.arrayBuffer() : null)
-    .then((buf) => {
-      callback( (new TextDecoder).decode( fzstd.decompress(new Uint8Array(buf)) ) )
-    })
-}
+const myfetch = (path) => fetch(path)
+  .then((res) => res.ok ? res.arrayBuffer() : Promise.reject())
+  // if couldn't retrieve a local file for whatever reason, try my online website
+  .catch((err) => path.startsWith('../')
+    // if the file is on the website but not in the repo
+    ? fetch(path.replace(/^\.\./, 'https://www.noureddin.dev'))
+        .then((res) => res.ok ? res.arrayBuffer() : Promise.reject())
+    : !path.starts('http')
+    // if the file is in the repo
+    ? fetch('https://www.noureddin.dev/irsaa/'+path)
+        .then((res) => res.ok ? res.arrayBuffer() : Promise.reject())
+    // otherwise, fail
+    : Promise.reject(err)
+  )
+
+const unzstd = (path, callback) => myfetch(path)
+  .then((buf) => callback( (new TextDecoder).decode( fzstd.decompress(new Uint8Array(buf)) ) ))
 
 const realwait = (sec) => new Promise((resolve, reject) => setTimeout(() => resolve(), sec*1000))
 
 const meta_loaded = unzstd('mymeta.json.zst?h=<<hash>>', (json) => { Object.assign(Q, JSON.parse(json)) })
 // for details, see mkmeta.sh (which includes _data.json without the comments, and a few data from quran-pages).
 
-const load_json_data = (path, callback) => {
-  return unzstd(QuranPagesRootRel + path, (json) => callback(JSON.parse(json))).catch(
-   () => unzstd(QuranPagesRootAbs + path, (json) => callback(JSON.parse(json))) )
-}
-
 const data_loaded = Promise.all([
   // realwait(1),  // for debugging
   meta_loaded,
   unzstd('imla.zst?h=<<hash>>',  (txt)  => { Q.imla = txt.split('\n').slice(0,-1) }),
-  load_json_data('data/words.json.zst?h=<<hash>>',    (obj) => { Q.words    = obj }),
-  load_json_data('data/lineends.json.zst?h=<<hash>>', (obj) => { Q.lineends = obj }),
-  load_json_data('data/suarayat.json.zst?h=<<hash>>', (obj) => { Q.suarayat = obj }),
-  load_json_data('data/ayat.json.zst?h=<<hash>>',     (obj) => { Q.ayat     = obj }),
-  load_json_data('data/pauses.json.zst?h=<<hash>>',   (obj) => { Q.pauses   = obj }),
+  unzstd(QuranPagesRootRel+'data/words.json.zst?h=<<hash>>',    (json) => { Q.words    = JSON.parse(json) }),
+  unzstd(QuranPagesRootRel+'data/lineends.json.zst?h=<<hash>>', (json) => { Q.lineends = JSON.parse(json) }),
+  unzstd(QuranPagesRootRel+'data/suarayat.json.zst?h=<<hash>>', (json) => { Q.suarayat = JSON.parse(json) }),
+  unzstd(QuranPagesRootRel+'data/ayat.json.zst?h=<<hash>>',     (json) => { Q.ayat     = JSON.parse(json) }),
+  unzstd(QuranPagesRootRel+'data/pauses.json.zst?h=<<hash>>',   (json) => { Q.pauses   = JSON.parse(json) }),
 ])
 
 // data_loaded.then(() => { console.log(Q) })
@@ -38,15 +43,7 @@ const data_loaded = Promise.all([
 const ondemand = (el_details, text_file, onsuccess, onerror) => {
   const p = el_details.querySelector('p')
   el_details.addEventListener('toggle', () => {
-    fetch(text_file)
-      .then((res) => res.ok ? res.arrayBuffer() : Promise.reject())
-      .catch((err) => text_file.startsWith('../')
-        ? fetch(text_file.replace(/^\.\./, 'https://www.noureddin.dev'))
-            .then((res) => res.ok ? res.arrayBuffer() : Promise.reject())
-        : Promise.reject(err)
-        // if the file is on the website but not in the repo,
-        // try again with the absolute path of the website, otherwise fail
-      )
+    myfetch(text_file)
       .then((buf) => onsuccess(p, (new TextDecoder).decode(new Uint8Array(buf)) ))
       .catch(() => onerror(p))
   }, { once: true, passive: true })
@@ -57,7 +54,7 @@ const ondemand = (el_details, text_file, onsuccess, onerror) => {
 ondemand(Qid('v'), 'changelog?h=<<hash_changelog>>', (p, text) => {
   p.outerHTML =
     text.split('\n').map(ln =>
-      ln.startsWith('- ') ? '<li>' + ln.slice(2).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      ln.startsWith('- ') ? '<li>' + ln.slice(2).replace(/&/g, '&amp;').replace(/<( )/g, '&lt; ')
       : ln.length === 0 ? '</ul>'
         : '<h2>' + ln.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</h2><ul>').join('\n') + '</ul>'
 }, (p) => { p.innerHTML = 'تعذّر تحميل سجل التغييرات.' })
@@ -103,3 +100,17 @@ ondemand(Qid('q'), '../recite/res/qaris', (p, text) => {
     }))
   }
 })
+
+// uthmani loading (get_uthmani_aaya) for search
+
+const get_uthmani_aaya = (() => {
+  const promises = []
+  const splits = [0, 493, 954, 1473, 2140, 2932, 3788, 4735, 6236]
+  return (a) => {
+    const i = bisect(splits, a) || 1
+    if (!promises[i]) {
+      promises[i] = unzstd('u/'+i+'.zst', (txt) => { Q['u'+i] = txt.split('\n').slice(0,-1) })
+    }
+    return promises[i].then(() => Promise.resolve(Q['u'+i][a - splits[i-1]]))
+  }
+})()

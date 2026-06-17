@@ -39,18 +39,6 @@ const arabic_fold = (txt) => {  // takes string, return a regex
     .replace(/x/g, '['+hmz)
 }
 
-// uthmani loading (get_uthmani_aaya) {{{1
-const get_uthmani_aaya = (() => {
-  const promises = []
-  const splits = [0, 493, 954, 1473, 2140, 2932, 3788, 4735, 6236]
-  return (a) => {
-    const i = bisect(splits, a) || 1
-    if (!promises[i]) {
-      promises[i] = unzstd('u/'+i+'.zst', (txt) => { Q['u'+i] = txt.split('\n').slice(0,-1) })
-    }
-    return promises[i].then(() => Promise.resolve(Q['u'+i][a - splits[i-1]]))
-  }
-})()
 
 // constants {{{1
 

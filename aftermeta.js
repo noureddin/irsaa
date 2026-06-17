@@ -92,6 +92,7 @@ const normal_scroll = (p, w) => {  // normal-mode scroll-into-view
 const sura_of = (a) => bisect(Q.sura_offset, a, 114)    // takes 1-based aaya ∈ [1-6236], returns its 1-based sura number
 const page_of = (a) => bisect(Q.page_offset, a, 604)+1  // takes 1-based aaya ∈ [1-6236], returns its 1-based page number
 
+// all Q.* here are in mymeta, except Q.ayat; thus this (and audio) must be called after data_loaded
 const page_word_to_sura_aaya = (p, w) => {
   if (p === 187 && w <= 1) { return [9,1] }  // At-Tawba - the only sura not starting with a basmala
   if (Q.basmalaat[p-1].includes(w) || Q.headers[p-1].includes(w)) { return [1,1] }  // the basmala, for audio
