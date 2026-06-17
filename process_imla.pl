@@ -4,13 +4,15 @@ use open qw[ :encoding(UTF-8) :std ];
 
 use constant out_as_json => 0;
 
+my $input = 'imla-lines.txt';
+
 # Some application-specific pre-processing is needed.
 # Some is done at runtime in JS, and some at build time here.
 
 # Every NSBP here correspond to a normal space in user input, but don't break words.
 
 # https://ar.wikisource.org/wiki/القرآن_الكريم_(بالرسم_الإملائي)/النص_المجرد
-open my $imla, '<', 'imla-lines.txt' or die "Couldn't open 'imla-lines.txt' for reading\n";
+open my $imla, '<', $input or die "Couldn't open '$input' for reading\n";
 
 open my $pipe, '|-', 'zstd -19 --force -o imla.zst' or exit 2;  # the system provides a good error messages
 print { $pipe } '[' if out_as_json;
@@ -20,6 +22,9 @@ print { $pipe } '[' if out_as_json;
 print { $pipe } <$imla> =~ s/ /\N{NBSP}/gr;
 
 for (<$imla>) {
+  # suar names and basmalaat
+  s/#/- # /;  # the sura name and the basmala
+  s/^براءة من الله ورسوله/- $&/;  # only the sura name (no basmala when starting Sura 9 At-Tawba)
   # The vocative Yā always connects to the next word in the Uthmani text
   s/(?<=\bيا) /\N{NBSP}/g;
   s/(?<=\bويا) /\N{NBSP}/g;  # e.g., page 152 (sura 7 aaya 19)

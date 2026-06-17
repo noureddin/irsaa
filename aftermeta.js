@@ -47,14 +47,9 @@ const update_input = (p, w, insert, double, keep=false) => {
 
 const get_correct_text = (p) => {
   let correct = Q.imla.slice(Q.page_offset[p-1], Q.page_offset[p])
-    .join(" \n ").split(" ").map(e => e.replace(/\xa0/g, " "))
+    .join(" \n ").split(" ")
+    .map(e => e.replace(/\xa0/g, " ").replace(/#/, 'بسم الله الرحمن الرحيم'))
   correct.push('\n')  // end of last aya
-  const h = Q.headers[p-1]
-  const b = Q.basmalaat[p-1]
-  for (let i = 0; i < h.length; ++i) { correct.splice(h[i], 0, '\n') }
-  for (let i = 0; i < b.length; ++i) { correct.splice(b[i], 0, 'بسم الله الرحمن الرحيم') }
-  // console.log(correct.map(e => e.replace(/\n/g, '-')).join('\n').replace(/([^-])\n(?=[^-])/g, '$1 '))
-  // console.log(Q.words[p-1].length, correct)
   return correct
 }
 
