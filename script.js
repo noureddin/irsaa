@@ -210,7 +210,11 @@ canvas.addEventListener('click', (ev) => {
   const [x, y, pp] = canvas_mouse_to_x_y_p(ev)
   // dbg_vline(x + (screen_double && pp % 2)*W)
   // dbg_hline(y)
-  for (let i = 0; i <= w+1 && i < Q.words[pp-1].length; ++i) {
+  const shown
+    = p < pp ? -1        // clicked on the next page
+    : p > pp ? Infinity  // clicked on the prev page
+      : w-1
+  for (let i = 0; i <= shown && i < Q.words[pp-1].length; ++i) {
     const [X,Y,W,H] = Q.words[pp-1][i]
     if (X <= x && x <= X+W && Y <= y && y <= Y+H) {
       if (Q.ayat[pp-1].indexOf(i) !== -1) {
