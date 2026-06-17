@@ -464,7 +464,7 @@ meta_loaded.then(() => {
     const [s, a] = sura_aaya_from_aaya_offset(y)  // s & a are 1-based
     sura_select.value = s - 1
     update_aayat()
-    aaya_select.value = a
+    aaya_select.value = a + 1
   }
 
   const page_word_offset_to_sura_aaya = (p, w) => {
