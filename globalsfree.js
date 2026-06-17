@@ -171,7 +171,7 @@ const pagescroll = document.querySelector('body>.scr')
 const [sura_aaya_go, page_line_go] = document.querySelectorAll('button.go')
 
 // popup
-const popup_focus_element = { 'h':document.querySelector('select') }
+const popup_focus_element = { h:sura_select }
 
 // others
 // the min width & height at which we choose double-page & fit-screen if no pref

@@ -41,7 +41,7 @@ CSS_ENV=HTTP_PROXY,http_proxy,__DIRECT__
 minjs()  { deno run --quiet --allow-read --allow-env=$JS_ENV  npm:uglify-js "$@"; }
 mincss() { deno run --quiet --allow-read --allow-env=$CSS_ENV npm:clean-css-cli "$@"; }
 
-reserved_props='fzstd,goatcounter,allow_frame'
+reserved_props='fzstd,goatcounter,allow_frame,h,c'
 
 # both do their monitoring themselves
 bash mkmeta.sh mymeta.json.zst
