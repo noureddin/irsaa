@@ -672,13 +672,11 @@ const window_onkeydown = (ev) => {
     else if (ev.code === 'Minus') { ev.preventDefault(); Movado.forward(ev.shiftKey) }
     else if (ev.ctrlKey && ev.key === 'Home') { ev.preventDefault(); page_home() }
     else if (ev.ctrlKey && ev.key === 'End')  { ev.preventDefault(); page_end()  }
-    else if (ev.key === 'Tab') { ev.preventDefault(); show_popup('h') }
     else if (ev.key === 'PageDown')  { ev.preventDefault(); ev.shiftKey ? next_full() : next_empty() }
     else if (ev.key === 'PageUp')    { ev.preventDefault(); ev.shiftKey ? prev_full() : prev_empty() }
     return  // don't handle anything else if in insert mode
   }
   //
-  else if (!has_popup && ev.key === 'Tab') { ev.preventDefault(); show_popup('h') }
   else if (helping && ev.key === 'Enter') {  // next element in the go-to selectors (not the options)
     if      (ev.target === sura_select) { ev.preventDefault();  aaya_select.focus() }
     else if (ev.target === aaya_select) { ev.preventDefault(); sura_aaya_go.focus() }
