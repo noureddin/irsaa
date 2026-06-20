@@ -170,7 +170,7 @@ needed() {
   return 1
 }
 
-jss='globalsfree.js init.js load.js aftermeta.js search.js osk.js state.js audio.js script.js main.js'
+jss='globalsfree.js init.js load.js pages.js aftermeta.js search.js osk.js state.js audio.js script.js main.js'
 
 if needed .minified.script -- $jss .hashes_vars.sh; then
   printf 'Preparing %s... ' 'the script'

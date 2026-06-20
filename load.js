@@ -29,11 +29,11 @@ const data_loaded = Promise.all([
   // realwait(1),  // for debugging
   meta_loaded,
   unzstd('imla.zst?h=<<hash>>',  (txt)  => { Q.imla = txt.split('\n').slice(0,-1) }),
-  unzstd(QuranPagesRootRel+'data/words.json.zst?h=<<hash>>',    (json) => { Q.words    = JSON.parse(json) }),
-  unzstd(QuranPagesRootRel+'data/lineends.json.zst?h=<<hash>>', (json) => { Q.lineends = JSON.parse(json) }),
-  unzstd(QuranPagesRootRel+'data/suarayat.json.zst?h=<<hash>>', (json) => { Q.suarayat = JSON.parse(json) }),
-  unzstd(QuranPagesRootRel+'data/ayat.json.zst?h=<<hash>>',     (json) => { Q.ayat     = JSON.parse(json) }),
-  unzstd(QuranPagesRootRel+'data/pauses.json.zst?h=<<hash>>',   (json) => { Q.pauses   = JSON.parse(json) }),
+  unzstd('../quran-pages/2/data/words.json.zst?h=<<hash>>',    (json) => { Q.words    = JSON.parse(json) }),
+  unzstd('../quran-pages/2/data/lineends.json.zst?h=<<hash>>', (json) => { Q.lineends = JSON.parse(json) }),
+  unzstd('../quran-pages/2/data/suarayat.json.zst?h=<<hash>>', (json) => { Q.suarayat = JSON.parse(json) }),
+  unzstd('../quran-pages/2/data/ayat.json.zst?h=<<hash>>',     (json) => { Q.ayat     = JSON.parse(json) }),
+  unzstd('../quran-pages/2/data/pauses.json.zst?h=<<hash>>',   (json) => { Q.pauses   = JSON.parse(json) }),
 ])
 
 // data_loaded.then(() => { console.log(Q) })
