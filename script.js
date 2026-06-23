@@ -278,7 +278,7 @@ const Movado = (() => {
     // otherwise the page is drawn:
     p = pp
     w = ww
-    hash_set_pw(p,w)
+    hash_set_pw(p, w === Q.words[p-1].length ? '-' : w)
     // assert_pw()
     if (withaudio) {
       if (has_popup) { audiopending = true }
@@ -326,7 +326,7 @@ const Movado = (() => {
     const skip_predicate = by_phrase ? isnt_phrase_end : is_void_word
     w = fn(p, w, page, WordsColor[+screen_dark], MarginColor[+screen_dark], skip_predicate)  // draws on offcanvas, unless it returns Q.words[p-1].length
     ctx.drawImage(w === Q.words[p-1].length ? page : offcanvas, page_offset_in_canvas(p), 0, W, H)
-    hash_set_pw(p,w)
+    hash_set_pw(p, w === Q.words[p-1].length ? '-' : w)
     play_this()
   }
 
