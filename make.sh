@@ -149,7 +149,6 @@ H() { perl -CSAD -Mutf8 -pE '
     s/&mdash;/\N{EM DASH}/g;
   }
   s/<<hash:mymeta>>/'$hash_mymeta'/g;
-  s/<<hash:changelog>>/'$hash_changelog'/g;
   s/<<version>>/'"${ver//\//\\\/}"'/g;
   s/<<(script|style)>>/"<$1>".`cat ".minified'"${1:-}"'.$1"`."<\/$1>"/ge;
   s/<<svg>>/`cat _svg` =~ s|<!--.*?-->||gr =~ s|  +| |gr =~ s|\n||gr/ge;

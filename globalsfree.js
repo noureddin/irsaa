@@ -36,6 +36,9 @@ const num_opts = (len) => Array(len).fill(null).map((_,a) => `<option value="${a
 ////////////////////////////////////////////////////////////////////////////////
 // constants {{{1
 
+const Root = '../'  // for data loading from sibling projects on noureddin.dev (github.com/noureddin/)
+const AltRoot = 'https://www.noureddin.dev/'
+
 const [W, H] = [776, 1053]
 
 // color constants (light & dark)

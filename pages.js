@@ -1,8 +1,8 @@
 // formats & urls {{{1
 // it maintains its internal state, but doesn't rely on anything external.
 
-const QuranPagesRootRel = '../quran-pages/2/'
-const QuranPagesRootAbs = 'https://www.noureddin.dev/quran-pages/2/'
+const QuranPagesRootRel =    Root+'quran-pages/2/'
+const QuranPagesRootAbs = AltRoot+'quran-pages/2/'
 
 const PageFormat = (() => {
 

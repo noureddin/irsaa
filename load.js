@@ -2,16 +2,18 @@
 // global (set once) variables
 const Q = {}  // metadata & text
 
+const QuranData = Root+'/quran-pages/2/data/'
+
 const myfetch = (path) => fetch(path)
   .then((res) => res.ok ? res.arrayBuffer() : Promise.reject())
   // if couldn't retrieve a local file for whatever reason, try my online website
-  .catch((err) => path.startsWith('../')
+  .catch((err) => path.startsWith(Root)
     // if the file is on the website but not in the repo
-    ? fetch(path.replace(/^\.\./, 'https://www.noureddin.dev'))
+    ? fetch(AltRoot + path.slice(Root.length))
         .then((res) => res.ok ? res.arrayBuffer() : Promise.reject())
-    : !path.starts('http')
+    : !path.match(/^https?:\/\//)
     // if the file is in the repo
-    ? fetch('https://www.noureddin.dev/irsaa/'+path)
+    ? fetch(AltRoot+'irsaa/'+path)
         .then((res) => res.ok ? res.arrayBuffer() : Promise.reject())
     // otherwise, fail
     : Promise.reject(err)
@@ -29,11 +31,11 @@ const data_loaded = Promise.all([
   // realwait(1),  // for debugging
   meta_loaded,
   unzstd('imla.zst?h=<<hash>>',  (txt)  => { Q.imla = txt.split('\n').slice(0,-1) }),
-  unzstd('../quran-pages/2/data/words.json.zst?h=<<hash>>',    (json) => { Q.words    = JSON.parse(json) }),
-  unzstd('../quran-pages/2/data/lineends.json.zst?h=<<hash>>', (json) => { Q.lineends = JSON.parse(json) }),
-  unzstd('../quran-pages/2/data/suarayat.json.zst?h=<<hash>>', (json) => { Q.suarayat = JSON.parse(json) }),
-  unzstd('../quran-pages/2/data/ayat.json.zst?h=<<hash>>',     (json) => { Q.ayat     = JSON.parse(json) }),
-  unzstd('../quran-pages/2/data/pauses.json.zst?h=<<hash>>',   (json) => { Q.pauses   = JSON.parse(json) }),
+  unzstd(QuranData+'words.json.zst?h=<<hash>>',    (json) => { Q.words    = JSON.parse(json) }),
+  unzstd(QuranData+'lineends.json.zst?h=<<hash>>', (json) => { Q.lineends = JSON.parse(json) }),
+  unzstd(QuranData+'suarayat.json.zst?h=<<hash>>', (json) => { Q.suarayat = JSON.parse(json) }),
+  unzstd(QuranData+'ayat.json.zst?h=<<hash>>',     (json) => { Q.ayat     = JSON.parse(json) }),
+  unzstd(QuranData+'pauses.json.zst?h=<<hash>>',   (json) => { Q.pauses   = JSON.parse(json) }),
 ])
 
 // data_loaded.then(() => { console.log(Q) })
@@ -51,7 +53,7 @@ const ondemand = (el_details, text_file, onsuccess, onerror) => {
 
 // changelog -- only loaded if asked for.
 
-ondemand(Qid('v'), 'changelog?h=<<hash_changelog>>', (p, text) => {
+ondemand(Qid('v'), 'changelog?h=<<hash>>', (p, text) => {
   p.outerHTML =
     text.split('\n').map(ln =>
       ln.startsWith('- ') ? '<li>' + ln.slice(2).replace(/&/g, '&amp;').replace(/<( )/g, '&lt; ')
@@ -63,7 +65,7 @@ ondemand(Qid('v'), 'changelog?h=<<hash_changelog>>', (p, text) => {
 
 // qaris select -- only loaded if asked for.
 
-ondemand(Qid('q'), '../recite/res/qaris', (p, text) => {
+ondemand(Qid('q'), Root+'recite/res/qaris', (p, text) => {
   const lines = text.split('\n')
   const L = (lines.length-1) / 2
   //
