@@ -19,7 +19,7 @@ print { $pipe } '[' if out_as_json;
 
 # Basmala of al-Fātiħa (the very first line in imla-lines.txt)
 # is written as one big ligature in the Uthmani text, not as separate words
-print { $pipe } <$imla> =~ s/ /\N{NBSP}/gr;
+print { $pipe } <$imla> =~ s/ /\N{NBSP}/gr =~ s/^/- /r;  # the hyphen to add the sura name
 
 for (<$imla>) {
   # suar names and basmalaat
