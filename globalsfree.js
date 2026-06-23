@@ -96,14 +96,16 @@ const wantqp = get_param('qp=')
 //   return m[m.length-1].replace(/.*?=/, "")  // that means: /?x returns 'x'; /?x=1 returns '1'; /?x= return ""
 // }
 
-const hash_get_pw = () => {
-  const [p,w] = url_params.reverse().reduce((acc, elem, idx) => acc ? acc : elem.match(/^[0-9]+(?:\/[0-9]+)?$/) ? elem.split('/') : null, null) || []
-  if ( !isNaN(p) && p >= 1 && p <= 604
-    && (w == null || !isNaN(w) && w >= 0)
-  ) {
-    return [+p, w == null ? 0 : +w]
-    // w == null to allow #1 (meaning #1/0); as #1/ is treated as #1/0
-  }
+const hash_get_pw = () => {  // called onhashchanged, thus needs to re-get the url parameters
+  const url_params_reversed = (location.search + location.hash.replace(/%23/g,'#')).split(/[?&#]/).reverse()
+  const [p,w] = url_params_reversed.reduce((acc, elem, idx) => acc ? acc : elem.match(/^[0-9]+(?:\/[0-9]*|\/-)?$/) ? elem.split('/') : null, null) || []
+  // now p is a nonnegative decimal number,
+  // and w is undefined (0) or empty strting (0) or a hyphen (full) or a nonnegative decimal number
+  return [p < 1 ? 1 : p > 604 ? 604 : +p,
+    w == null ? 0 : w === '-' ? 300 : +w]
+  // w == null to allow #1 (meaning #1/0); as #1/ is treated as #1/0 (remember: +"" === 0)
+  // w === '-' so that #1/- means full page (w is clipped once data is loaded)
+  // any other (non-number) value of w discards the entire p/w pair
 }
 
 const hash_set_pw = (p,w) => { history.replaceState(null, null, '#'+p+'/'+w) }
