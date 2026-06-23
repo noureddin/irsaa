@@ -88,6 +88,11 @@ const wantqari = get_param('qari=')
 const wantqs = get_param('qs=')
 const wantqp = get_param('qp=')
 
+const wantedkb = (() => {
+  const e = get_param('emu=')
+  return e === 'arak' ? e : 'ibm'
+})()
+
 // const get_param = (key, def) => {
 //   // const rx = new RegExp('^\\Q' + key + '\\E(?:$|=)')  // doesn't work?
 //   const rx = new RegExp('^' + key.replace(/[.\[\](){}^+*?-]/g, '\\$&') + '(?:$|=)')

@@ -318,10 +318,11 @@ const insert_in_field = (el, ch) => {
 
 const intended_key = (ev) => {
   if (ev.key.match(/^[ \nء-غف-ي]$/)) { return ev.key }
-  // if not emulating (the only choice for now), but entered a non-Arabic letter → auto-emulate the mainstream kb
+  // if not emulating but entered a non-Arabic letter → auto-emulate the mainstream kb
+  // or emulating that kb or another supported one → emulate it
   const kk
-    = Q['ibm'][ev.code]
-    ? Q['ibm'][ev.code][+ev.shiftKey]
+    = Q[wantedkb][ev.code]
+    ? Q[wantedkb][ev.code][+ev.shiftKey]
     : null
   if (kk && kk.match(/^[ \nء-غف-ي]$|^ل[اأإآ]$/)) { return kk }
 }
