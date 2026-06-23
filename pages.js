@@ -1,5 +1,5 @@
 // formats & urls {{{1
-// they maintain its internal state, but doesn't rely on anything external.
+// it maintains its internal state, but doesn't rely on anything external.
 
 const QuranPagesRootRel = '../quran-pages/2/'
 const QuranPagesRootAbs = 'https://www.noureddin.dev/quran-pages/2/'

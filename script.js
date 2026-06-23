@@ -267,7 +267,7 @@ const Movado = (() => {
   // all Movado methods call either update_page_to() or move() to change p&w
 
   const update_page_to = async (pp, ww) => {
-    const withaudio = !redrawing  // needed to be captured here, because we wait for update_page()
+    const newpage = !redrawing  // needed to be captured here, because we wait for update_page()
     pp = fixpage(pp)
     if (ww != null) {
       while (ww < Q.words[pp-1].length && is_void_word(pp, +ww)) { ++ww }
@@ -278,9 +278,9 @@ const Movado = (() => {
     // otherwise the page is drawn:
     p = pp
     w = ww
-    hash_set_pw(p, w === Q.words[p-1].length ? '-' : w)
+    hash_set_pw(p, w < Q.words[p-1].length ? w : '-')
     // assert_pw()
-    if (withaudio) {
+    if (newpage) {
       if (has_popup) { audiopending = true }
       else { play_or_preload_this() }
     }
@@ -320,13 +320,14 @@ const Movado = (() => {
 
   //
 
-  const move = (fn, by_phrase) => {
+  const move = (fn, by_phrase) => {  // fn is show_words or hide_words
     const page = Pages.has(screen_dark, p)
     // assert(page != null, `page ${p} not available, called in forward() or backward()`)
     const skip_predicate = by_phrase ? isnt_phrase_end : is_void_word
-    w = fn(p, w, page, WordsColor[+screen_dark], MarginColor[+screen_dark], skip_predicate)  // draws on offcanvas, unless it returns Q.words[p-1].length
-    ctx.drawImage(w === Q.words[p-1].length ? page : offcanvas, page_offset_in_canvas(p), 0, W, H)
-    hash_set_pw(p, w === Q.words[p-1].length ? '-' : w)
+    w = fn(p, w, page, WordsColor[+screen_dark], MarginColor[+screen_dark], skip_predicate)
+    // ^ draws on offcanvas, unless it returns Q.words[p-1].length
+    ctx.drawImage(w < Q.words[p-1].length ? offcanvas : page, page_offset_in_canvas(p), 0, W, H)
+    hash_set_pw(p, w < Q.words[p-1].length ? w : '-')
     play_this()
   }
 
